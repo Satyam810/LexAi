@@ -1,0 +1,19 @@
+{
+  "faiss_only": {
+    "mrr": 0.8507,
+    "precision": 0.712,
+    "ndcg": 0.8787,
+    "n_queries": 50
+  },
+  "faiss_plus_reranker": {
+    "mrr": 0.684,
+    "precision": 0.596,
+    "ndcg": 0.7468,
+    "n_queries": 50
+  },
+  "improvement": {
+    "mrr_delta": -0.1667,
+    "precision_delta": -0.116,
+    "ndcg_delta": -0.1319
+  }
+}

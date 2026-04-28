@@ -1,0 +1,11 @@
+{
+  "winner_algorithm": "kmeans",
+  "n_clusters": 5,
+  "silhouette_score": 0.0495,
+  "davies_bouldin_score": 3.3645,
+  "kmeans_best_k": 5,
+  "kmeans_best_silhouette": 0.0495,
+  "hdbscan_n_clusters": 0,
+  "hdbscan_silhouette": 0.0,
+  "total_cases": 500
+}

@@ -1,0 +1,132 @@
+[
+  {
+    "cluster_id": 0,
+    "total_cases": 96,
+    "positive_outcome_count": 50,
+    "negative_outcome_count": 46,
+    "convicted_count": 12,
+    "acquitted_count": 3,
+    "bail_granted_count": 47,
+    "bail_rejected_count": 34,
+    "inconsistency_score": 0.479,
+    "common_ipc_sections": [
+      "302",
+      "34",
+      "120B",
+      "307",
+      "148"
+    ],
+    "dominant_case_type": "criminal",
+    "courts_involved": [
+      "Supreme Court of India",
+      "Delhi High Court",
+      "Orissa High Court",
+      "High Court of Tripura, Agartala",
+      "Andhra Pradesh High Court"
+    ]
+  },
+  {
+    "cluster_id": 4,
+    "total_cases": 137,
+    "positive_outcome_count": 63,
+    "negative_outcome_count": 74,
+    "convicted_count": 9,
+    "acquitted_count": 9,
+    "bail_granted_count": 54,
+    "bail_rejected_count": 65,
+    "inconsistency_score": 0.46,
+    "common_ipc_sections": [
+      "37",
+      "120B",
+      "34",
+      "307",
+      "420"
+    ],
+    "dominant_case_type": "general",
+    "courts_involved": [
+      "Supreme Court of India",
+      "Delhi High Court",
+      "Jammu & Kashmir and Ladakh High Court, Srinagar Bench",
+      "Andhra Pradesh High Court",
+      "Gauhati High Court"
+    ]
+  },
+  {
+    "cluster_id": 3,
+    "total_cases": 84,
+    "positive_outcome_count": 49,
+    "negative_outcome_count": 35,
+    "convicted_count": 2,
+    "acquitted_count": 2,
+    "bail_granted_count": 47,
+    "bail_rejected_count": 33,
+    "inconsistency_score": 0.417,
+    "common_ipc_sections": [
+      "498A",
+      "304B",
+      "34",
+      "306",
+      "302"
+    ],
+    "dominant_case_type": "criminal",
+    "courts_involved": [
+      "Karnataka High Court, Dharwad Bench",
+      "Supreme Court of India",
+      "Delhi High Court",
+      "Tis Hazari Courts (West), Delhi",
+      "Rajasthan High Court"
+    ]
+  },
+  {
+    "cluster_id": 2,
+    "total_cases": 97,
+    "positive_outcome_count": 64,
+    "negative_outcome_count": 33,
+    "convicted_count": 4,
+    "acquitted_count": 5,
+    "bail_granted_count": 59,
+    "bail_rejected_count": 29,
+    "inconsistency_score": 0.34,
+    "common_ipc_sections": [
+      "376",
+      "34",
+      "506",
+      "363",
+      "120B"
+    ],
+    "dominant_case_type": "criminal",
+    "courts_involved": [
+      "Karnataka High Court, Dharwad Bench",
+      "Supreme Court of India",
+      "Delhi High Court",
+      "Orissa High Court",
+      "Bengaluru Urban District, Child Friendly Court"
+    ]
+  },
+  {
+    "cluster_id": 1,
+    "total_cases": 86,
+    "positive_outcome_count": 61,
+    "negative_outcome_count": 25,
+    "convicted_count": 4,
+    "acquitted_count": 4,
+    "bail_granted_count": 57,
+    "bail_rejected_count": 21,
+    "inconsistency_score": 0.291,
+    "common_ipc_sections": [
+      "363",
+      "120B",
+      "34",
+      "364A",
+      "302"
+    ],
+    "dominant_case_type": "criminal",
+    "courts_involved": [
+      "Karnataka High Court, Dharwad Bench",
+      "Supreme Court of India",
+      "Delhi High Court",
+      "Orissa High Court",
+      "Karnataka High Court, Bengaluru"
+    ]
+  }
+]
