@@ -4,14 +4,14 @@ STRICTLY display-only. All ML logic lives in src/search_pipeline.py.
 """
 import streamlit as st
 import plotly.express as px
-import plotly.graph_objects as go
+
 import pandas as pd
 import json, os
 
 # Must be first Streamlit call
 st.set_page_config(
     page_title="LexAI - Legal Judgment Analyzer",
-    page_icon="<law_icon>",
+    page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -106,13 +106,15 @@ def render_search():
         use_reranker = st.checkbox("Use cross-encoder reranker", value=True)
 
     if st.button("Search", type="primary", use_container_width=True):
-        if not query.strip():
-            st.warning("Please enter a query.")
+        from src.query_validator import validate_query
+        valid, clean_query, error_msg = validate_query(query)
+        if not valid:
+            st.warning(error_msg)
             return
 
         with st.spinner("Searching..."):
             from src.search_pipeline import search
-            results = search(query, use_reranker=use_reranker)
+            results = search(clean_query, use_reranker=use_reranker)
 
         st.success(
             f"Found {results['total_candidates']} candidates, "

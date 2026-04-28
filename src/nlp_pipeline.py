@@ -41,6 +41,7 @@ VERDICT_PATTERNS = {
     "bail_rejected": [
         r"\b(bail\s+(is\s+)?reject\w*|refused\s+bail)\b",
         r"\bbail\s+application\b.*\bdismiss\w*\b",
+        r"\bbail\s+application\b.*\breject\w*\b",
         r"\bremanded\s+(to\s+)?(judicial\s+)?custody\b",
         r"\bbail\s+application\b.*\brefus\w*\b",
         r"\bbail\s+pray\w*\b.*\b(dismiss|reject|refus)\w*\b",

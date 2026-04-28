@@ -1,9 +1,34 @@
+# Data
 data/raw/
 data/processed/embeddings.npy
 data/processed/faiss.index
 data/judgments.db
+
+# Python
 __pycache__/
-.env
 *.pyc
-.DS_Store
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
 venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
+
+# Scratch/debug files
+check_db.py
+check_imports.py
+schema_check.py

@@ -32,12 +32,13 @@ def rerank(query_text: str, candidates: list, top_k: int = 5) -> list:
 
     reranker = get_reranker()
     pairs = [(query_text[:500], c["text"][:500]) for c in candidates]
-    scores = reranker.predict(pairs)
+    import numpy as np
+    scores = np.array(reranker.predict(pairs)).flatten().tolist()
 
     for c, score in zip(candidates, scores):
-        c["rerank_score"] = float(score)
+        c["rerank_score"] = score
         # Combined score: 0.4 * FAISS + 0.6 * reranker (reranker is more precise)
-        c["final_score"] = 0.4 * c.get("faiss_score", 0) + 0.6 * float(score)
+        c["final_score"] = 0.4 * c.get("faiss_score", 0) + 0.6 * score
 
     ranked = sorted(candidates, key=lambda x: x["final_score"], reverse=True)
     return ranked[:top_k]

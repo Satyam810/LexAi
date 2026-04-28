@@ -10,7 +10,7 @@ from config import (
     EMBEDDING_MODEL, RERANKER_MODEL,
     CASES_JSON_PATH, EMBEDDINGS_PATH, FAISS_INDEX_PATH,
     LABELS_PATH, RETRIEVAL_METRICS_PATH,
-    TOP_K_RETRIEVAL
+    TOP_K_RETRIEVAL, EVAL_SAMPLE_SIZE, EVAL_TOP_K
 )
 
 
@@ -33,7 +33,7 @@ def ndcg_at_k(relevances, k):
     return actual / ideal if ideal > 0 else 0.0
 
 
-def evaluate_retrieval(cases, embeddings, labels, index, use_reranker=False, k=5):
+def evaluate_retrieval(cases, embeddings, labels, index, use_reranker=False, k=EVAL_TOP_K):
     if use_reranker:
         reranker = CrossEncoder(RERANKER_MODEL)
 
@@ -41,8 +41,9 @@ def evaluate_retrieval(cases, embeddings, labels, index, use_reranker=False, k=5
     precision_scores = []
     ndcg_scores = []
 
-    # Sample 50 queries (every 10th case) for speed
-    query_indices = list(range(0, len(cases), 10))[:50]
+    # Sample queries for speed
+    step = max(1, len(cases) // EVAL_SAMPLE_SIZE)
+    query_indices = list(range(0, len(cases), step))[:EVAL_SAMPLE_SIZE]
 
     for qi in query_indices:
         query_label = labels[qi]
