@@ -1,0 +1,9 @@
+data/raw/
+data/processed/embeddings.npy
+data/processed/faiss.index
+data/judgments.db
+__pycache__/
+.env
+*.pyc
+.DS_Store
+venv/
