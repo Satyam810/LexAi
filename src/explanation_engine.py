@@ -1,116 +1,147 @@
-"""Phase 6 — Deterministic Explanation Engine.
-
-Generates human-readable explanations for why two cases are similar.
-No LLM calls — purely rule-based for reproducibility.
 """
-import json
-from collections import Counter
+Explanation engine — deterministic, template-based structured diff.
+
+NO LLM dependency. No API calls. Always fast. Always consistent.
+
+EXPORTS (both required by other modules):
+  explain_similarity(query_case, retrieved_case, similarity_score) -> dict
+  explain_results(query_case, results) -> list[dict]
+"""
 
 
-def explain_similarity(query_case: dict, result_case: dict,
-                       similarity_score: float) -> dict:
-    reasons = []
-    shared_details = {}
+def explain_similarity(
+    query_case: dict,
+    retrieved_case: dict,
+    similarity_score: float
+) -> dict:
+    """
+    Generate structured explanation comparing query to one retrieved case.
 
-    # 1. IPC section overlap
+    Args:
+        query_case:       NLP-processed dict for the user query
+        retrieved_case:   NLP-processed dict for a retrieved result
+        similarity_score: relevance score from cross-encoder
+
+    Returns:
+        dict with keys: similarity_score, similarity_reason, key_differences,
+        verdict_analysis, shared_ipc, shared_evidence, shared_case_type,
+        retrieved_verdict, retrieved_court, retrieved_date
+    """
+    # IPC comparison
     q_ipc = set(query_case.get("ipc_sections", []))
-    r_ipc = set(result_case.get("ipc_sections", []))
-    shared_ipc = q_ipc & r_ipc
+    r_ipc = set(retrieved_case.get("ipc_sections", []))
+    shared_ipc      = sorted(q_ipc & r_ipc)
+    q_only_ipc      = sorted(q_ipc - r_ipc)
+    r_only_ipc      = sorted(r_ipc - q_ipc)
+
+    # Evidence comparison
+    q_evidence = set(query_case.get("evidence_types", []))
+    r_evidence = set(retrieved_case.get("evidence_types", []))
+    shared_evidence  = sorted(q_evidence & r_evidence)
+    q_only_evidence  = sorted(q_evidence - r_evidence)
+    r_only_evidence  = sorted(r_evidence - q_evidence)
+
+    # Case type
+    q_type = query_case.get("case_type", "unknown")
+    r_type = retrieved_case.get("case_type", "unknown")
+    shared_case_type = (q_type == r_type)
+
+    # Court and verdict
+    q_court   = query_case.get("court", "unknown")
+    r_court   = retrieved_case.get("court", "unknown")
+    q_verdict = query_case.get("verdict", "unknown")
+    r_verdict = retrieved_case.get("verdict", "unknown")
+
+    # ── Similarity reason ──────────────────────────────────────────────────
+    reasons = []
     if shared_ipc:
-        reasons.append(
-            f"Both cases involve IPC sections: {', '.join(sorted(shared_ipc))}"
-        )
-        shared_details["shared_ipc"] = sorted(shared_ipc)
-
-    # 2. Same court
-    q_court = query_case.get("court", "").strip()
-    r_court = result_case.get("court", "").strip()
-    if q_court and r_court and q_court.lower() == r_court.lower():
-        reasons.append(f"Both cases were heard in {q_court}")
-        shared_details["same_court"] = q_court
-
-    # 3. Same verdict
-    q_verdict = query_case.get("verdict", "")
-    r_verdict = result_case.get("verdict", "")
-    if q_verdict and r_verdict and q_verdict == r_verdict:
-        verdict_display = q_verdict.replace("_", " ").title()
-        reasons.append(f"Both cases resulted in: {verdict_display}")
-        shared_details["same_verdict"] = q_verdict
-
-    # 4. Same case type
-    q_type = query_case.get("case_type", "")
-    r_type = result_case.get("case_type", "")
-    if q_type and r_type and q_type == r_type:
-        reasons.append(f"Both are {q_type} cases")
-        shared_details["same_case_type"] = q_type
-
-    # 5. Same crime type
-    q_crime = query_case.get("crime_type", "")
-    r_crime = result_case.get("crime_type", "")
-    if q_crime and r_crime and q_crime.lower() == r_crime.lower():
-        reasons.append(f"Both involve {q_crime}")
-        shared_details["same_crime_type"] = q_crime
-
-    # 6. Shared evidence types
-    q_ev = set(query_case.get("evidence_types", []))
-    r_ev = set(result_case.get("evidence_types", []))
-    shared_ev = q_ev & r_ev
-    if shared_ev:
-        reasons.append(
-            f"Both reference: {', '.join(sorted(shared_ev))}"
-        )
-        shared_details["shared_evidence"] = sorted(shared_ev)
-
-    # 7. Entity overlap (persons, organizations)
-    q_ents = query_case.get("entities", {})
-    r_ents = result_case.get("entities", {})
-    for ent_type in ["persons", "organizations"]:
-        q_set = set(q_ents.get(ent_type, []))
-        r_set = set(r_ents.get(ent_type, []))
-        shared = q_set & r_set
-        if shared:
-            reasons.append(
-                f"Shared {ent_type}: {', '.join(sorted(shared))}"
-            )
-            shared_details[f"shared_{ent_type}"] = sorted(shared)
-
-    # 8. Similarity strength
-    if similarity_score >= 0.9:
-        strength = "Very High"
-    elif similarity_score >= 0.7:
-        strength = "High"
-    elif similarity_score >= 0.5:
-        strength = "Moderate"
-    else:
-        strength = "Low"
-
-    # Fallback if no specific reasons found
+        reasons.append(f"both cite IPC {', '.join(shared_ipc)}")
+    if shared_case_type:
+        reasons.append(f"both are {q_type} cases")
+    if shared_evidence:
+        reasons.append(f"both involve {', '.join(shared_evidence)} evidence")
     if not reasons:
-        reasons.append(
-            "Cases share similar legal language and context "
-            f"(semantic similarity: {similarity_score:.2f})"
+        reasons.append("high semantic similarity in legal language and factual context")
+    similarity_reason = "Similarity: " + "; ".join(reasons).capitalize() + "."
+
+    # ── Key differences ────────────────────────────────────────────────────
+    diffs = []
+    if q_only_ipc:
+        diffs.append(f"your case cites IPC {', '.join(q_only_ipc)} (absent here)")
+    if r_only_ipc:
+        diffs.append(f"this case additionally cites IPC {', '.join(r_only_ipc)}")
+    if q_only_evidence:
+        diffs.append(f"your case has {', '.join(q_only_evidence)} evidence (absent here)")
+    if r_only_evidence:
+        diffs.append(f"this case has {', '.join(r_only_evidence)} evidence (absent in yours)")
+    if not shared_case_type:
+        diffs.append(f"case type differs: yours is {q_type}, this is {r_type}")
+    if q_court != r_court and r_court != "unknown":
+        diffs.append(f"decided by {r_court}")
+    if not diffs:
+        diffs.append("no major structural differences detected")
+    key_differences = "Differences: " + "; ".join(diffs).capitalize() + "."
+
+    # ── Verdict analysis ───────────────────────────────────────────────────
+    if q_verdict == "unknown" or r_verdict == "unknown":
+        verdict_analysis = (
+            "Verdict comparison: unable to extract verdicts reliably "
+            "from one or both cases."
         )
+    elif q_verdict == r_verdict:
+        verdict_analysis = (
+            f"Verdict alignment: both cases resulted in {r_verdict}."
+        )
+    else:
+        verdict_factors = []
+        if "forensic" in r_evidence and "forensic" not in q_evidence:
+            verdict_factors.append("this case had forensic evidence")
+        if "eyewitness" in r_evidence and "eyewitness" not in q_evidence:
+            verdict_factors.append("this case had eyewitness testimony")
+        if "confession" in r_evidence and "confession" not in q_evidence:
+            verdict_factors.append("this case included a confession")
+        if "forensic" in q_evidence and "forensic" not in r_evidence:
+            verdict_factors.append("your case has forensic evidence this one lacked")
+
+        if verdict_factors:
+            verdict_analysis = (
+                f"Verdict divergence: your case trends {q_verdict}, "
+                f"this case was {r_verdict}. "
+                f"Possible factor: {'; '.join(verdict_factors)}."
+            )
+        else:
+            verdict_analysis = (
+                f"Verdict divergence: your case trends {q_verdict}, "
+                f"this case was {r_verdict}. "
+                f"Similar charges led to opposite outcomes — review carefully."
+            )
 
     return {
-        "similarity_score": round(similarity_score, 4),
-        "similarity_strength": strength,
-        "reasons": reasons,
-        "shared_details": shared_details,
-        "summary": f"{strength} similarity ({similarity_score:.2f}). "
-                   + reasons[0] if reasons else "Semantic match.",
+        "similarity_score":  round(similarity_score, 3),
+        "similarity_reason": similarity_reason,
+        "key_differences":   key_differences,
+        "verdict_analysis":  verdict_analysis,
+        "shared_ipc":        shared_ipc,
+        "shared_evidence":   shared_evidence,
+        "shared_case_type":  shared_case_type,
+        "retrieved_verdict": r_verdict,
+        "retrieved_court":   r_court,
+        "retrieved_date":    retrieved_case.get("date", ""),
     }
 
 
-def explain_gap(gap: dict) -> str:
-    sections = ", ".join(gap.get("common_ipc_sections", [])[:3]) or "various"
-    score_pct = int(gap.get("inconsistency_score", 0) * 100)
-    granted = gap.get("bail_granted_count", 0) + gap.get("acquitted_count", 0)
-    rejected = gap.get("bail_rejected_count", 0) + gap.get("convicted_count", 0)
-    total = gap.get("total_cases", 0)
+def explain_results(query_case: dict, results: list) -> list:
+    """
+    Run explanation for all reranked results.
 
-    return (
-        f"Cluster {gap['cluster_id']}: {total} similar cases involving "
-        f"IPC {sections} show {score_pct}% verdict inconsistency. "
-        f"{granted} favorable vs {rejected} unfavorable outcomes. "
-        f"This suggests potential sentencing disparity worth investigating."
-    )
+    Args:
+        query_case: NLP-processed dict for the query
+        results:    list of (case_dict, score) tuples from reranker
+
+    Returns:
+        list of explanation dicts, one per result
+    """
+    return [
+        explain_similarity(query_case, case, score)
+        for case, score in results
+    ]

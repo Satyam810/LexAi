@@ -1,19 +1,33 @@
 {
+  "evaluation_summary": {
+    "total_cases": 500,
+    "evaluable_cases": 476,
+    "queries_evaluated": 96,
+    "queries_skipped": 4,
+    "eval_k": 5,
+    "relevance_oracle": "shared_ipc_section_and_same_case_type"
+  },
   "faiss_only": {
-    "mrr": 0.8507,
-    "precision": 0.712,
-    "ndcg": 0.8787,
-    "n_queries": 50
+    "MRR@5": 0.504,
+    "P@5": 0.3229,
+    "NDCG@5": 0.5612
   },
   "faiss_plus_reranker": {
-    "mrr": 0.684,
-    "precision": 0.596,
-    "ndcg": 0.7468,
-    "n_queries": 50
+    "MRR@5": 0.4019,
+    "P@5": 0.2375,
+    "NDCG@5": 0.4644
   },
-  "improvement": {
-    "mrr_delta": -0.1667,
-    "precision_delta": -0.116,
-    "ndcg_delta": -0.1319
+  "reranker_improvement": {
+    "MRR_delta": -0.1021,
+    "P5_delta": -0.0854,
+    "NDCG_delta": -0.0968
+  },
+  "latency": {
+    "avg_query_ms": 5524.1,
+    "p95_query_ms": 11173.5
+  },
+  "model_info": {
+    "embedding_model": "nlpaueb/legal-bert-base-uncased",
+    "reranker_model": "cross-encoder/nli-deberta-v3-small"
   }
 }

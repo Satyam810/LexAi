@@ -75,6 +75,14 @@ lexai/
 | Precision@5 | 0.7120 | 0.5960 |
 | NDCG@5 | 0.8787 | 0.7468 |
 
+## Known Limitations
+
+- Clustering silhouette score is 0.0495 on 500 cases —
+  below the 0.1 target. LegalBERT embeddings of 500 Indian
+  judgments show low cluster separation, likely due to
+  dataset size. Target: re-run Phase 4 with 1,000+ cases
+  once Indian Kanoon API key is available.
+
 ## License
 
 MIT
