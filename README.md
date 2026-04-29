@@ -77,6 +77,15 @@ lexai/
 
 ## Known Limitations
 
+### Clustering note
+Silhouette score = 0.049 on 500 cases. LegalBERT embeddings
+on this dataset do not form tightly separated clusters — Indian
+judgment texts share significant legal boilerplate across case
+types. A larger, more diverse dataset (5,000+ cases) would
+produce better cluster separation. This does not affect search
+quality, which is evaluated separately with MRR/NDCG metrics.
+
+
 - Clustering silhouette score is 0.0495 on 500 cases —
   below the 0.1 target. LegalBERT embeddings of 500 Indian
   judgments show low cluster separation, likely due to

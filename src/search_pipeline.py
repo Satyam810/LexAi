@@ -1,17 +1,19 @@
 """
-Search pipeline orchestrator — single entry point for all searches.
+Search pipeline orchestrator — single entry point for all search.
 
-EXPORTS (all required by other modules):
-  SearchPipeline          — main class
-  PipelineResponse        — return type dataclass
-  SearchResult            — individual result dataclass
-  check_required_files()  — runtime safety check function
-
-Usage:
+Usage in app.py:
     from src.search_pipeline import SearchPipeline
     pipeline = SearchPipeline()
     ok, msg = pipeline.health_check()
-    response = pipeline.search("IPC 302 murder eyewitness...", top_k=5)
+    response = pipeline.search("your query", top_k=5)
+
+Architecture:
+    validate → NLP → embed → FAISS → rerank → explain
+    All ML code lives HERE. app.py is UI only.
+
+Runtime safety:
+    Missing files → clear error message, not traceback.
+    health_check() lets app.py show a banner before first search.
 """
 
 import json, numpy as np, faiss, logging, time
@@ -33,8 +35,7 @@ from src.explanation_engine import explain_results
 
 log = logging.getLogger(__name__)
 
-
-# ── Required files for runtime safety ───────────────────────────────────────
+# ── Required files + error messages ─────────────────────────────────────────
 
 REQUIRED_FILES = {
     "cases":       CASES_JSON_PATH,
@@ -61,10 +62,7 @@ SETUP_INSTRUCTIONS = {
 def check_required_files() -> tuple:
     """
     Check all required files exist before loading any model.
-
-    Returns:
-        (True, "") if all files present
-        (False, setup_instruction_string) if any file missing
+    Returns (ok: bool, error_message: str).
     """
     for name, path in REQUIRED_FILES.items():
         if not Path(path).exists():
@@ -85,7 +83,7 @@ class SearchResult:
 
 @dataclass
 class PipelineResponse:
-    """Full response from SearchPipeline.search()."""
+    """Full response from pipeline.search()."""
     success:    bool
     query_case: Optional[dict]  = None
     results:    list            = field(default_factory=list)
@@ -94,30 +92,26 @@ class PipelineResponse:
     latency_ms: Optional[float] = None
 
 
-# ── Pipeline orchestrator ────────────────────────────────────────────────────
+# ── Pipeline class ───────────────────────────────────────────────────────────
 
 class SearchPipeline:
     """
     Full LexAI search pipeline with lazy-loaded singleton resources.
 
-    Manages the complete sync pipeline:
-      validate → NLP → embed → FAISS → rerank → explain
-
-    Runtime safety: checks required files exist before any model loads.
+    Create once per Streamlit session (@st.cache_resource).
     """
 
     def __init__(self):
         self._cases       = None
         self._index       = None
         self._embed_model = None
-        self._id_to_idx   = {}    # O(1) id → index lookup
         self._ready       = False
         self._init_error  = None
 
         files_ok, file_error = check_required_files()
         if not files_ok:
             self._init_error = file_error
-            log.warning(f"SearchPipeline: required files missing — {file_error}")
+            log.error(f"SearchPipeline init: {file_error}")
         else:
             self._ready = True
 
@@ -136,15 +130,12 @@ class SearchPipeline:
     def _load_assets(self):
         """Lazy-load heavy assets on first search call."""
         if self._cases is not None:
-            return  # already loaded
+            return
 
         log.info("Loading search assets (first call)...")
 
-        with open(CASES_JSON_PATH, encoding="utf-8") as f:
+        with open(CASES_JSON_PATH) as f:
             self._cases = json.load(f)
-
-        # O(1) id→index map — avoids O(n) cases.index() linear scan
-        self._id_to_idx = {c["id"]: i for i, c in enumerate(self._cases)}
 
         self._index = faiss.read_index(FAISS_INDEX_PATH)
 
@@ -157,7 +148,7 @@ class SearchPipeline:
         )
 
     def _build_query_case(self, query_text: str) -> dict:
-        """Run NLP extraction on raw query text."""
+        """Run NLP extraction on the raw query text."""
         clean = clean_text(query_text)
         return {
             "text":           clean,
@@ -180,12 +171,12 @@ class SearchPipeline:
         Full pipeline: validate → NLP → embed → FAISS → rerank → explain.
 
         Args:
-            query_text:     raw text from the user (not pre-processed)
-            top_k:          number of results to return (default 5)
+            query_text:     raw text from the user
+            top_k:          number of results to return
             verdict_filter: "All" or a specific verdict label
 
         Returns:
-            PipelineResponse (success=True with results, or success=False with error)
+            PipelineResponse
         """
         t_start = time.time()
 
@@ -197,7 +188,7 @@ class SearchPipeline:
                 error_type="setup_error"
             )
 
-        # Step 2: Validate input
+        # Step 2: Validate query
         is_valid, validation_error = validate_query(query_text)
         if not is_valid:
             return PipelineResponse(
@@ -206,18 +197,18 @@ class SearchPipeline:
                 error_type="validation_error"
             )
 
-        # Step 3: Load assets (lazy, only on first call)
+        # Step 3: Load assets (lazy)
         try:
             self._load_assets()
         except Exception as e:
             log.error(f"Asset load failed: {e}")
             return PipelineResponse(
                 success=False,
-                error=f"Failed to load search index: {str(e)}",
+                error=f"Failed to load search index: {e}",
                 error_type="load_error"
             )
 
-        # Step 4: NLP extraction on query
+        # Step 4: NLP extraction
         query_case = self._build_query_case(query_text)
 
         # Step 5: Embed + FAISS search
@@ -226,7 +217,6 @@ class SearchPipeline:
             [" ".join(q_words)]
         ).astype("float32")
         faiss.normalize_L2(q_emb)
-
         scores_arr, idxs = self._index.search(q_emb, TOP_K_RETRIEVAL)
 
         candidates = []
@@ -241,10 +231,11 @@ class SearchPipeline:
                 success=True,
                 query_case=query_case,
                 results=[],
+                error=None,
                 latency_ms=round((time.time() - t_start) * 1000, 1)
             )
 
-        # Step 6: Cross-encoder reranking
+        # Step 6: Reranking
         reranked = rerank(query_text, candidates, top_k=top_k)
 
         # Step 7: Explanation engine
@@ -261,7 +252,7 @@ class SearchPipeline:
         ]
 
         latency = round((time.time() - t_start) * 1000, 1)
-        log.info(f"Search complete: {len(results)} results in {latency}ms")
+        log.info(f"Search: {len(results)} results in {latency}ms")
 
         return PipelineResponse(
             success=True,

@@ -3,7 +3,7 @@ Explanation engine — deterministic, template-based structured diff.
 
 NO LLM dependency. No API calls. Always fast. Always consistent.
 
-EXPORTS (both required by other modules):
+Exported functions (both required by search_pipeline.py):
   explain_similarity(query_case, retrieved_case, similarity_score) -> dict
   explain_results(query_case, results) -> list[dict]
 """
@@ -18,28 +18,26 @@ def explain_similarity(
     Generate structured explanation comparing query to one retrieved case.
 
     Args:
-        query_case:       NLP-processed dict for the user query
+        query_case:       NLP-processed dict for the user's query text
         retrieved_case:   NLP-processed dict for a retrieved result
-        similarity_score: relevance score from cross-encoder
+        similarity_score: reranker relevance score (float)
 
     Returns:
-        dict with keys: similarity_score, similarity_reason, key_differences,
-        verdict_analysis, shared_ipc, shared_evidence, shared_case_type,
-        retrieved_verdict, retrieved_court, retrieved_date
+        dict with 10 keys
     """
     # IPC comparison
     q_ipc = set(query_case.get("ipc_sections", []))
     r_ipc = set(retrieved_case.get("ipc_sections", []))
-    shared_ipc      = sorted(q_ipc & r_ipc)
-    q_only_ipc      = sorted(q_ipc - r_ipc)
-    r_only_ipc      = sorted(r_ipc - q_ipc)
+    shared_ipc   = sorted(q_ipc & r_ipc)
+    q_only_ipc   = sorted(q_ipc - r_ipc)
+    r_only_ipc   = sorted(r_ipc - q_ipc)
 
     # Evidence comparison
     q_evidence = set(query_case.get("evidence_types", []))
     r_evidence = set(retrieved_case.get("evidence_types", []))
-    shared_evidence  = sorted(q_evidence & r_evidence)
-    q_only_evidence  = sorted(q_evidence - r_evidence)
-    r_only_evidence  = sorted(r_evidence - q_evidence)
+    shared_evidence = sorted(q_evidence & r_evidence)
+    q_only_evidence = sorted(q_evidence - r_evidence)
+    r_only_evidence = sorted(r_evidence - q_evidence)
 
     # Case type
     q_type = query_case.get("case_type", "unknown")
@@ -61,7 +59,9 @@ def explain_similarity(
     if shared_evidence:
         reasons.append(f"both involve {', '.join(shared_evidence)} evidence")
     if not reasons:
-        reasons.append("high semantic similarity in legal language and factual context")
+        reasons.append(
+            "high semantic similarity in legal language and factual context"
+        )
     similarity_reason = "Similarity: " + "; ".join(reasons).capitalize() + "."
 
     # ── Key differences ────────────────────────────────────────────────────
@@ -71,11 +71,17 @@ def explain_similarity(
     if r_only_ipc:
         diffs.append(f"this case additionally cites IPC {', '.join(r_only_ipc)}")
     if q_only_evidence:
-        diffs.append(f"your case has {', '.join(q_only_evidence)} evidence (absent here)")
+        diffs.append(
+            f"your case has {', '.join(q_only_evidence)} evidence (absent here)"
+        )
     if r_only_evidence:
-        diffs.append(f"this case has {', '.join(r_only_evidence)} evidence (absent in yours)")
+        diffs.append(
+            f"this case has {', '.join(r_only_evidence)} evidence (absent in yours)"
+        )
     if not shared_case_type:
-        diffs.append(f"case type differs: yours is {q_type}, this is {r_type}")
+        diffs.append(
+            f"case type differs: yours is {q_type}, this is {r_type}"
+        )
     if q_court != r_court and r_court != "unknown":
         diffs.append(f"decided by {r_court}")
     if not diffs:
@@ -101,8 +107,9 @@ def explain_similarity(
         if "confession" in r_evidence and "confession" not in q_evidence:
             verdict_factors.append("this case included a confession")
         if "forensic" in q_evidence and "forensic" not in r_evidence:
-            verdict_factors.append("your case has forensic evidence this one lacked")
-
+            verdict_factors.append(
+                "your case has forensic evidence this one lacked"
+            )
         if verdict_factors:
             verdict_analysis = (
                 f"Verdict divergence: your case trends {q_verdict}, "

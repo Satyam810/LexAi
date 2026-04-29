@@ -1,11 +1,6 @@
-"""
-Test: cross-encoder correctly reorders FAISS results.
-
-Wrong case (civil property, FAISS=0.82) must end up BELOW
-right case (IPC 302 criminal, FAISS=0.79) after reranking.
-
-Run: python test_reranker.py
-"""
+from src.reranker import rerank
+import importlib, src.reranker
+importlib.reload(src.reranker)
 from src.reranker import rerank
 
 query = "accused charged under IPC 302 murder with eyewitness and forensic evidence"
@@ -32,23 +27,13 @@ fake_candidates = [
     ),
 ]
 
-print("Testing cross-encoder reranker (nli-deberta entailment score)...")
-print()
-
 results = rerank(query, fake_candidates, top_k=2)
-
 print("Re-ranked order:")
 for i, (case, score) in enumerate(results, 1):
-    print(f"  #{i}  entailment={score:.4f}  "
-          f"case_type={case['case_type']}  "
-          f"verdict={case['verdict']}")
-    print(f"       {case['text'][:65]}...")
+    print(f"  #{i}  entailment={score:.4f}  case_type={case['case_type']}")
 
-print()
 if results[0][0]["case_type"] == "criminal":
-    print("✅ PASS: IPC 302 criminal case ranked #1 despite lower FAISS score.")
-    print("   Entailment score fix is working correctly.")
+    print("\n✅ PASS: IPC 302 criminal case ranked #1 (entailment score fix working)")
 else:
-    print("❌ FAIL: Civil case ranked #1 — entailment extraction not working.")
-    print("   Check: reranker.py uses raw_scores[:, 2] (entailment column)")
-    print("   Debug: add print(raw_scores.shape) inside reranker.py predict()")
+    print("\n❌ FAIL: Civil case still ranked #1")
+    print("   Debug: print raw_scores in reranker.py to see the 3-column output")

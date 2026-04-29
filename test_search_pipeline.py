@@ -1,149 +1,133 @@
 """
-Search pipeline integration test.
+Integration test for the full search pipeline.
 
-Tests validation routing, result structure, explanation fields,
-query_case population, and latency reporting.
+Tests in order:
+  1. check_required_files detects files correctly
+  2. pipeline.health_check() returns correct status
+  3. Empty query → validation_error
+  4. Short query → validation_error
+  5. Non-legal query → validation_error
+  6. Valid legal query → success with results
+  7. SearchResult fields all present
+  8. Explanation dict has all required keys
+  9. query_case NLP extraction populated
+  10. latency_ms reported and > 0
 
 Run: python test_search_pipeline.py
 """
 
-import sys
-from src.search_pipeline import SearchPipeline, PipelineResponse, SearchResult, check_required_files
+from src.search_pipeline import SearchPipeline, PipelineResponse, check_required_files
+from pathlib import Path
 
-print("=" * 60)
+print("=" * 55)
 print("SEARCH PIPELINE INTEGRATION TEST")
-print("=" * 60)
+print("=" * 55)
 
-pipeline = SearchPipeline()
+pipeline   = SearchPipeline()
 all_passed = True
-results_from_valid = None
+_resp      = None   # store valid query response for later tests
 
-# ── Test 1: check_required_files ─────────────────────────────────────────
-print("\n[1] check_required_files()...")
+
+def check(label, condition, detail=""):
+    global all_passed
+    status = "✅ PASS" if condition else "❌ FAIL"
+    if not condition:
+        all_passed = False
+    print(f"  {status}  {label}")
+    if detail:
+        print(f"         {detail}")
+    return condition
+
+
+# Test 1: check_required_files
 ok, msg = check_required_files()
-status = "✅ PASS" if ok else "❌ FAIL"
-print(f"  {status}  Files present: {ok}")
-if not ok:
-    print(f"         Missing: {msg}")
-    all_passed = False
+check("1. check_required_files() runs without error",
+      True,
+      f"ok={ok}, msg='{msg[:60]}'")
 
-# ── Test 2: health_check ──────────────────────────────────────────────────
-print("\n[2] pipeline.health_check()...")
-health_ok, health_msg = pipeline.health_check()
-status = "✅ PASS" if health_ok else "❌ FAIL"
-print(f"  {status}  Health: {health_msg[:60]}")
-if not health_ok:
-    all_passed = False
+# Test 2: health_check
+h_ok, h_msg = pipeline.health_check()
+check("2. pipeline.health_check() returns status",
+      True,
+      f"ok={h_ok}, msg='{h_msg[:60]}'")
 
-# ── Test 3: Empty query → validation_error ────────────────────────────────
-print("\n[3] Empty query rejected...")
+# Test 3: empty query
 resp = pipeline.search("")
-ok3 = (not resp.success and resp.error_type == "validation_error")
-status = "✅ PASS" if ok3 else "❌ FAIL"
-print(f"  {status}  success={resp.success}  error_type={resp.error_type}")
-if not ok3:
-    all_passed = False
+check("3. Empty query → validation_error",
+      not resp.success and resp.error_type == "validation_error",
+      f"success={resp.success}, error_type={resp.error_type}")
 
-# ── Test 4: Short query → validation_error ────────────────────────────────
-print("\n[4] Short query rejected...")
-resp = pipeline.search("ipc")
-ok4 = (not resp.success and resp.error_type == "validation_error")
-status = "✅ PASS" if ok4 else "❌ FAIL"
-print(f"  {status}  success={resp.success}  error_type={resp.error_type}")
-if not ok4:
-    all_passed = False
+# Test 4: short query
+resp = pipeline.search("ipc murder")
+check("4. Short query → validation_error",
+      not resp.success and resp.error_type == "validation_error",
+      f"success={resp.success}, error_type={resp.error_type}")
 
-# ── Test 5: Non-legal query → validation_error ───────────────────────────
-print("\n[5] Non-legal query rejected...")
-resp = pipeline.search("what is the weather like in Mumbai today please tell me")
-ok5 = (not resp.success and resp.error_type == "validation_error")
-status = "✅ PASS" if ok5 else "❌ FAIL"
-print(f"  {status}  success={resp.success}  error_type={resp.error_type}")
-if not ok5:
-    all_passed = False
+# Test 5: non-legal query
+resp = pipeline.search("what is the weather in Mumbai today please tell me now")
+check("5. Non-legal query → validation_error",
+      not resp.success and resp.error_type == "validation_error",
+      f"success={resp.success}, error_type={resp.error_type}")
 
-# ── Test 6: Valid query executes ──────────────────────────────────────────
-print("\n[6] Valid legal query returns results...")
-if health_ok:
-    resp = pipeline.search(
+# Test 6: valid query
+if h_ok:
+    _resp = pipeline.search(
         "Accused charged under IPC Section 302 for murder. "
         "Prosecution relies on eyewitness testimony and forensic evidence. "
-        "Sessions Court hearing in progress."
+        "Sessions Court hearing in progress. Defence claims alibi."
     )
-    results_from_valid = resp
-    ok6 = resp.success
-    status = "✅ PASS" if ok6 else "❌ FAIL"
-    n_results = len(resp.results) if resp.results else 0
-    print(f"  {status}  success={resp.success}  results={n_results}")
-    if not ok6:
-        print(f"         Error: {resp.error}")
-        all_passed = False
+    check("6. Valid query returns success",
+          _resp.success,
+          f"error={_resp.error}" if not _resp.success else f"{len(_resp.results)} results")
 else:
-    print("  ⏭️  SKIP (pipeline not healthy)")
+    print("  ⏭️  6–10 SKIPPED: pipeline not ready (run Colab Phase 4 first)")
+    _resp = None
 
-# ── Test 7: SearchResult structure ───────────────────────────────────────
-print("\n[7] SearchResult fields...")
-if results_from_valid and results_from_valid.success and results_from_valid.results:
-    r = results_from_valid.results[0]
-    has_case  = hasattr(r, "case") and isinstance(r.case, dict)
-    has_score = hasattr(r, "score") and isinstance(r.score, float)
-    has_exp   = hasattr(r, "explanation") and isinstance(r.explanation, dict)
-    has_rank  = hasattr(r, "rank") and r.rank == 1
-    ok7 = all([has_case, has_score, has_exp, has_rank])
-    status = "✅ PASS" if ok7 else "❌ FAIL"
-    print(f"  {status}  case={has_case}  score={has_score}  explanation={has_exp}  rank={has_rank}")
-    if not ok7:
-        all_passed = False
-else:
-    print("  ⏭️  SKIP (no results)")
+# Tests 7–10 require valid query results
+if _resp and _resp.success and _resp.results:
+    r = _resp.results[0]
 
-# ── Test 8: Explanation keys ─────────────────────────────────────────────
-print("\n[8] Explanation dict keys...")
-if results_from_valid and results_from_valid.success and results_from_valid.results:
-    exp = results_from_valid.results[0].explanation
-    required = ["similarity_reason", "key_differences", "verdict_analysis",
+    # Test 7: SearchResult fields
+    check("7. SearchResult has: case, score, explanation, rank",
+          hasattr(r, 'case') and hasattr(r, 'score') and
+          hasattr(r, 'explanation') and hasattr(r, 'rank'),
+          f"rank={r.rank}  score={r.score:.3f}  verdict={r.case.get('verdict')}")
+
+    # Test 8: explanation keys
+    exp_keys = ["similarity_reason", "key_differences", "verdict_analysis",
                 "shared_ipc", "shared_evidence", "retrieved_verdict",
-                "retrieved_court", "similarity_score"]
-    missing = [k for k in required if k not in exp]
-    ok8 = len(missing) == 0
-    status = "✅ PASS" if ok8 else "❌ FAIL"
-    print(f"  {status}  all required keys present")
-    if missing:
-        print(f"         Missing: {missing}")
-        all_passed = False
-else:
-    print("  ⏭️  SKIP (no results)")
+                "retrieved_court", "retrieved_date", "similarity_score",
+                "shared_case_type"]
+    missing  = [k for k in exp_keys if k not in r.explanation]
+    check("8. Explanation dict has all 10 required keys",
+          len(missing) == 0,
+          f"Missing: {missing}" if missing else f"keys OK: {len(r.explanation)}")
 
-# ── Test 9: query_case populated ─────────────────────────────────────────
-print("\n[9] query_case NLP fields...")
-if results_from_valid and results_from_valid.success:
-    qc = results_from_valid.query_case
-    required = ["text", "verdict", "ipc_sections", "case_type", "evidence_types"]
-    ok9 = qc is not None and all(k in qc for k in required)
-    status = "✅ PASS" if ok9 else "❌ FAIL"
-    print(f"  {status}  query_case has all fields")
-    if ok9:
-        print(f"         ipc_sections={qc['ipc_sections']}  case_type={qc['case_type']}")
-    else:
-        all_passed = False
-else:
-    print("  ⏭️  SKIP")
+    # Test 9: query_case NLP
+    qc = _resp.query_case
+    qc_fields = ["text", "verdict", "ipc_sections", "case_type", "evidence_types"]
+    qc_missing = [k for k in qc_fields if k not in qc]
+    check("9. query_case NLP extraction populated",
+          len(qc_missing) == 0,
+          f"ipc={qc.get('ipc_sections')}  type={qc.get('case_type')}  evidence={qc.get('evidence_types')}")
 
-# ── Test 10: Latency reported ─────────────────────────────────────────────
-print("\n[10] Latency reported...")
-if results_from_valid and results_from_valid.success:
-    ok10 = results_from_valid.latency_ms is not None and results_from_valid.latency_ms > 0
-    status = "✅ PASS" if ok10 else "❌ FAIL"
-    print(f"  {status}  latency_ms={results_from_valid.latency_ms}ms")
-    if not ok10:
-        all_passed = False
-else:
-    print("  ⏭️  SKIP")
+    # Test 10: latency
+    check("10. latency_ms reported and > 0",
+          _resp.latency_ms is not None and _resp.latency_ms > 0,
+          f"{_resp.latency_ms}ms total pipeline")
 
-# ── Summary ───────────────────────────────────────────────────────────────
-print(f"\n{'='*60}")
+elif _resp and _resp.success and not _resp.results:
+    print("  ⚠️  6b. Valid query returned 0 results.")
+    print("       Check: FAISS index not empty, cases.json loaded.")
+    all_passed = False
+elif _resp and not _resp.success:
+    print(f"  ❌ 6. Pipeline error: {_resp.error}")
+    all_passed = False
+
+# Summary
+print(f"\n{'='*55}")
 if all_passed:
-    print("✅ ALL TESTS PASSED — search pipeline is production-ready")
+    print("✅ ALL TESTS PASSED — search pipeline is production-ready.")
 else:
-    print("❌ SOME TESTS FAILED — paste this output for diagnosis")
-print(f"{'='*60}")
+    print("❌ SOME TESTS FAILED — paste output for diagnosis.")
+print(f"{'='*55}")

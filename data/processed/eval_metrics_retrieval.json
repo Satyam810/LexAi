@@ -8,26 +8,30 @@
     "relevance_oracle": "shared_ipc_section_and_same_case_type"
   },
   "faiss_only": {
-    "MRR@5": 0.504,
-    "P@5": 0.3229,
-    "NDCG@5": 0.5612
+    "MRR@5": 0.5269,
+    "P@5": 0.325,
+    "NDCG@5": 0.5746
   },
   "faiss_plus_reranker": {
-    "MRR@5": 0.4019,
-    "P@5": 0.2375,
-    "NDCG@5": 0.4644
+    "MRR@5": 0.42,
+    "P@5": 0.2333,
+    "NDCG@5": 0.4746
   },
   "reranker_improvement": {
-    "MRR_delta": -0.1021,
-    "P5_delta": -0.0854,
-    "NDCG_delta": -0.0968
+    "MRR_delta": -0.1069,
+    "P5_delta": -0.0917,
+    "NDCG_delta": -0.1
   },
   "latency": {
-    "avg_query_ms": 5524.1,
-    "p95_query_ms": 11173.5
+    "avg_embed_ms": 267.8,
+    "avg_faiss_ms": 0.3,
+    "avg_rerank_ms": 4976.5,
+    "avg_query_ms": 5247.8,
+    "p95_query_ms": 7191.6
   },
   "model_info": {
     "embedding_model": "nlpaueb/legal-bert-base-uncased",
-    "reranker_model": "cross-encoder/nli-deberta-v3-small"
+    "reranker_model": "cross-encoder/nli-deberta-v3-small",
+    "score_column": "entailment (index 2 of 3 NLI labels)"
   }
 }
