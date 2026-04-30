@@ -24,7 +24,7 @@ SPACY_MODEL = "en_core_web_lg"
 # v3.1: nli-deberta instead of ms-marco
 # ms-marco trained on Bing web search clicks — wrong domain for law
 # nli-deberta trained on NLI entailment — maps to legal reasoning
-RERANKER_MODEL = "cross-encoder/nli-deberta-v3-small"
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 START_WITH_N_CASES = 500
 MAX_TEXT_LENGTH = 512

@@ -62,17 +62,13 @@ def rerank(query_text: str, candidates: list, top_k: int = 5) -> list:
 
     # Predict: returns shape (n_pairs, 3) for NLI model
     # apply_softmax=True converts logits → probabilities
-    raw_scores = model.predict(pairs, apply_softmax=True, show_progress_bar=False)
+    raw = model.predict(pairs, show_progress_bar=False)
+    raw = np.array(raw)
 
-    # Extract entailment probability (column 2)
-    # Label order for nli-deberta-v3-small: 0=contradiction, 1=neutral, 2=entailment
-    raw_scores = np.array(raw_scores)
-    if raw_scores.ndim == 2 and raw_scores.shape[1] == 3:
-        # NLI model — use entailment column
-        scores = raw_scores[:, 2]
+    if raw.ndim == 2 and raw.shape[1] == 3:
+        scores = raw[:, 2]   # NLI model — entailment column
     else:
-        # Fallback: single-label model, use scores directly
-        scores = raw_scores.flatten()
+        scores = raw.flatten()  # single-score model — use directly
 
     # Zip scores back to candidates and sort descending
     scored = [

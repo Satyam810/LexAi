@@ -6,7 +6,7 @@ import streamlit as st
 import plotly.express as px
 
 import pandas as pd
-import json, os
+import json, os, numpy as np
 
 # Must be first Streamlit call
 st.set_page_config(
@@ -66,6 +66,22 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+def get_metrics():
+    with open("data/processed/eval_metrics.json") as f:
+        return json.load(f)
+
+def get_cluster_data():
+    with open("data/processed/cases.json") as f: cases = json.load(f)
+    with open("data/processed/cluster_topics.json") as f: topics = json.load(f)
+    labels = np.load("data/processed/cluster_labels.npy")
+    coords = np.load("data/processed/coords_2d.npy")
+    return {"cases": cases, "labels": labels, "coords": coords, "topics": topics}
+
+def get_gaps():
+    with open("data/processed/gaps.json") as f:
+        return json.load(f)
+
+
 def render_header():
     st.markdown("""
     <div class="main-header">
@@ -92,6 +108,12 @@ def render_metrics(metrics):
         """, unsafe_allow_html=True)
 
 
+@st.cache_resource
+def get_pipeline():
+    from src.search_pipeline import SearchPipeline
+    return SearchPipeline()
+
+
 def render_search():
     st.markdown("### Search Similar Judgments")
     query = st.text_area(
@@ -106,61 +128,65 @@ def render_search():
         use_reranker = st.checkbox("Use cross-encoder reranker", value=True)
 
     if st.button("Search", type="primary", use_container_width=True):
-        from src.query_validator import validate_query
-        valid, clean_query, error_msg = validate_query(query)
-        if not valid:
-            st.warning(error_msg)
+        pipeline = get_pipeline()
+        ok, msg = pipeline.health_check()
+        if not ok:
+            st.warning(msg)
             return
 
         with st.spinner("Searching..."):
-            from src.search_pipeline import search
-            results = search(clean_query, use_reranker=use_reranker)
+            response = pipeline.search(query, top_k=5)
+
+        if not response.success:
+            st.warning(response.error)
+            return
 
         st.success(
-            f"Found {results['total_candidates']} candidates, "
-            f"showing top {len(results['results'])}. "
-            f"Reranker: {'ON' if results['reranker_used'] else 'OFF'}"
+            f"Found {len(response.results)} candidates. "
+            f"Latency: {response.latency_ms}ms"
         )
 
-        for i, r in enumerate(results["results"]):
-            exp = r.get("explanation", {})
-            score = r.get("final_score", r.get("faiss_score", 0))
-            strength = exp.get("similarity_strength", "N/A")
+        for i, r in enumerate(response.results):
+            exp = r.explanation
+            score = r.score
+            strength = "High" if score > 0.8 else "Medium" if score > 0.5 else "Low"
 
             with st.expander(
-                f"#{i+1} | {r.get('case_title', r['id'])} | "
+                f"#{r.rank} | Case {i+1} | "
                 f"{strength} ({score:.3f})",
                 expanded=(i == 0)
             ):
                 c1, c2, c3 = st.columns(3)
-                c1.metric("Court", r.get("court", "N/A"))
-                c2.metric("Verdict", r.get("verdict", "N/A").replace("_", " ").title())
-                c3.metric("Crime Type", r.get("crime_type", "N/A"))
+                c1.metric("Court", r.case.get("court", "N/A"))
+                c2.metric("Verdict", r.case.get("verdict", "N/A").replace("_", " ").title())
+                c3.metric("Crime Type", r.case.get("case_type", "N/A"))
 
                 # IPC tags
-                ipc = r.get("ipc_sections", [])
+                ipc = r.case.get("ipc_sections", [])
                 if ipc:
                     tags = " ".join(f'<span class="tag">IPC {s}</span>' for s in ipc[:8])
                     st.markdown(f"**IPC Sections:** {tags}", unsafe_allow_html=True)
 
                 # Explanation reasons
-                reasons = exp.get("reasons", [])
-                if reasons:
-                    st.markdown("**Why similar:**")
-                    for reason in reasons:
-                        st.markdown(f"- {reason}")
+                st.markdown("**Why similar:**")
+                st.markdown(f"- {exp.get('similarity_reason')}")
+                st.markdown(f"- {exp.get('key_differences')}")
+                st.markdown(f"- {exp.get('verdict_analysis')}")
 
                 # Case text
                 st.markdown("**Judgment excerpt:**")
-                st.markdown(f">{r['text'][:400]}...")
+                st.markdown(f">{r.case['text'][:400]}...")
 
 
 def render_cluster_map():
     st.markdown("### Judgment Cluster Map")
-    from src.search_pipeline import get_cluster_data
 
     with st.spinner("Loading cluster data..."):
-        data = get_cluster_data()
+        try:
+            data = get_cluster_data()
+        except Exception as e:
+            st.error(f"Could not load cluster data: {e}")
+            return
 
     cases = data["cases"]
     labels = data["labels"]
@@ -171,7 +197,7 @@ def render_cluster_map():
         "x": [c[0] for c in coords],
         "y": [c[1] for c in coords],
         "cluster": [str(l) for l in labels],
-        "title": [c.get("case_title", c["id"])[:50] for c in cases],
+        "title": [c.get("case_title", c.get("id", f"Case {i}"))[:50] for i, c in enumerate(cases)],
         "verdict": [c.get("verdict", "unknown") for c in cases],
         "court": [c.get("court", "unknown") for c in cases],
         "topic": [topics.get(str(l), f"Cluster {l}") for l in labels],
@@ -196,8 +222,12 @@ def render_cluster_map():
 
 def render_verdict_distribution():
     st.markdown("### Verdict Distribution")
-    from src.search_pipeline import get_cluster_data
-    data = get_cluster_data()
+    try:
+        data = get_cluster_data()
+    except Exception as e:
+        st.error(f"Data not found: {e}")
+        return
+        
     cases = data["cases"]
 
     verdicts = {}
@@ -227,9 +257,12 @@ def render_verdict_distribution():
 
 def render_gaps():
     st.markdown("### Legal Gaps & Inconsistencies")
-    from src.search_pipeline import get_gaps
-
-    gaps = get_gaps()
+    
+    try:
+        gaps = get_gaps()
+    except Exception as e:
+        st.error(f"Gaps data not found: {e}")
+        return
 
     if not gaps:
         st.info("No verdict inconsistencies detected in the current dataset.")
@@ -276,20 +309,20 @@ def render_eval_metrics():
         with col1:
             st.markdown("**FAISS Only**")
             fo = rmetrics.get("faiss_only", {})
-            st.metric("MRR@5", f"{fo.get('mrr', 0):.4f}")
-            st.metric("Precision@5", f"{fo.get('precision', 0):.4f}")
-            st.metric("NDCG@5", f"{fo.get('ndcg', 0):.4f}")
+            st.metric("MRR@5", f"{fo.get('MRR@5', 0):.4f}")
+            st.metric("Precision@5", f"{fo.get('P@5', 0):.4f}")
+            st.metric("NDCG@5", f"{fo.get('NDCG@5', 0):.4f}")
 
         with col2:
             st.markdown("**FAISS + Reranker**")
             fr = rmetrics.get("faiss_plus_reranker", {})
-            imp = rmetrics.get("improvement", {})
-            st.metric("MRR@5", f"{fr.get('mrr', 0):.4f}",
-                      delta=f"{imp.get('mrr_delta', 0):+.4f}")
-            st.metric("Precision@5", f"{fr.get('precision', 0):.4f}",
-                      delta=f"{imp.get('precision_delta', 0):+.4f}")
-            st.metric("NDCG@5", f"{fr.get('ndcg', 0):.4f}",
-                      delta=f"{imp.get('ndcg_delta', 0):+.4f}")
+            imp = rmetrics.get("reranker_improvement", {})
+            st.metric("MRR@5", f"{fr.get('MRR@5', 0):.4f}",
+                      delta=f"{imp.get('MRR_delta', 0):+.4f}")
+            st.metric("Precision@5", f"{fr.get('P@5', 0):.4f}",
+                      delta=f"{imp.get('P5_delta', 0):+.4f}")
+            st.metric("NDCG@5", f"{fr.get('NDCG@5', 0):.4f}",
+                      delta=f"{imp.get('NDCG_delta', 0):+.4f}")
     else:
         st.info("Run `python -m src.eval_pipeline` to generate retrieval metrics.")
 
@@ -312,11 +345,10 @@ def main():
 
     # Load metrics for header
     try:
-        from src.search_pipeline import get_metrics
         metrics = get_metrics()
         render_metrics(metrics)
-    except Exception:
-        st.warning("Run Phase 4 Colab notebook first to generate data.")
+    except Exception as e:
+        st.warning(f"Run Phase 4 Colab notebook first to generate data. Error: {e}")
         return
 
     st.markdown("---")
