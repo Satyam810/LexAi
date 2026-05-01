@@ -236,7 +236,11 @@ class SearchPipeline:
             )
 
         # Step 6: Reranking
-        reranked = rerank(query_text, candidates, top_k=top_k)
+        from config import USE_RERANKER
+        if USE_RERANKER:
+            reranked = rerank(query_text, candidates, top_k=top_k)
+        else:
+            reranked = candidates[:top_k]
 
         # Step 7: Explanation engine
         explanations = explain_results(query_case, reranked)

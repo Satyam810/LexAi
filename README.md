@@ -69,11 +69,12 @@ lexai/
 
 ## Evaluation Results
 
-| Metric | FAISS Only | FAISS + Reranker |
-|---|---|---|
-| MRR@5 | 0.8507 | 0.6840 |
-| Precision@5 | 0.7120 | 0.5960 |
-| NDCG@5 | 0.8787 | 0.7468 |
+| Metric | Score |
+|---|---|
+| MRR@5 | 0.5269 |
+| P@5 | 0.3250 |
+| NDCG@5 | 0.5746 |
+| Avg latency | ~270ms |
 
 ## Known Limitations
 
