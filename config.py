@@ -26,7 +26,10 @@ SPACY_MODEL = "en_core_web_lg"
 # nli-deberta trained on NLI entailment — maps to legal reasoning
 RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
-START_WITH_N_CASES = 500
+# v3.2 Production config: Disable reranker for latency improvements
+USE_RERANKER = False
+START_WITH_N_CASES = 5000
+UMAP_SUBSAMPLE_LIMIT = 2000
 MAX_TEXT_LENGTH = 512
 BATCH_SIZE = 32
 HDBSCAN_MIN_CLUSTER_SIZE = 10

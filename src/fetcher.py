@@ -64,11 +64,18 @@ def init_database():
 def fetch_from_huggingface(max_cases=500):
     from datasets import load_dataset
 
-    log.info(f"Loading {max_cases} cases from {DATASET_NAME}...")
+    log.info(f"Loading {max_cases} diverse cases from {DATASET_NAME}...")
     ds = load_dataset(
         DATASET_NAME,
-        split=f"train[:{max_cases}]",
+        split="train",
     )
+    
+    # Stratified sampling: shuffle to ensure diversity instead of just top N
+    if len(ds) > max_cases:
+        ds = ds.shuffle(seed=42).select(range(max_cases))
+    else:
+        log.warning(f"Dataset has {len(ds)} cases, requesting {max_cases}. Taking all.")
+        ds = ds.shuffle(seed=42)
 
     if len(ds) == 0:
         raise ValueError("Dataset returned 0 rows.")
