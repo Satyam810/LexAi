@@ -3,6 +3,11 @@ data/raw/
 data/processed/embeddings.npy
 data/processed/faiss.index
 data/judgments.db
+data/feedback.json
+data/feedback.lock
+
+# Logs
+logs/
 
 # Python
 __pycache__/
