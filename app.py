@@ -24,227 +24,271 @@ if "feedback" not in st.session_state:
 # ── Dark theme CSS ────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── Global typography ─────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* ── Premium Typography ─────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.01em;
 }
 
-/* ── Remove default Streamlit padding ──────────────── */
+/* ── Streamlit UI Overrides ────────────────────────── */
 .main .block-container {
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
-    max-width: 1100px;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    max-width: 1200px;
+}
+.stApp {
+    background: radial-gradient(circle at top, #1e293b 0%, #020617 100%);
 }
 
 /* ── Sidebar ────────────────────────────────────────── */
 [data-testid="stSidebar"] {
-    background: #0f172a;
-    border-right: 1px solid #1e293b;
-}
-[data-testid="stSidebar"] .css-1d391kg {
-    padding-top: 2rem;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* ── Header banner ──────────────────────────────────── */
+/* ── Header Banner (Glassmorphism) ──────────────────── */
 .lexai-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-    border: 1px solid #1e40af;
-    border-radius: 12px;
-    padding: 24px 32px;
-    margin-bottom: 24px;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, rgba(15, 23, 42, 0.4) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(96, 165, 250, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    padding: 32px 40px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
 }
+.lexai-header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 50%);
+    z-index: 0; pointer-events: none;
+}
+.lexai-header > * { position: relative; z-index: 1; }
 .lexai-header h1 {
-    color: #60a5fa;
-    font-size: 28px;
+    background: linear-gradient(to right, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 36px;
     font-weight: 700;
     margin: 0;
-    letter-spacing: -0.5px;
+    letter-spacing: -1px;
 }
 .lexai-header p {
     color: #94a3b8;
-    font-size: 14px;
-    margin: 4px 0 0 0;
+    font-size: 15px;
+    margin: 8px 0 0 0;
+    font-weight: 400;
 }
 
-/* ── Metric cards ────────────────────────────────────── */
+/* ── Metric Cards ────────────────────────────────────── */
 .metric-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 20px;
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 24px;
     text-align: center;
-    transition: border-color 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
-.metric-card:hover { border-color: #60a5fa; }
+.metric-card:hover { 
+    transform: translateY(-4px);
+    border-color: rgba(96, 165, 250, 0.4); 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.1);
+}
 .metric-card .value {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 700;
-    color: #f1f5f9;
+    color: #f8fafc;
     line-height: 1;
 }
 .metric-card .label {
     font-size: 12px;
-    color: #64748b;
-    margin-top: 6px;
+    color: #94a3b8;
+    margin-top: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    font-weight: 500;
 }
 
-/* ── Search input ───────────────────────────────────── */
+/* ── Search Input ───────────────────────────────────── */
 .stTextArea textarea {
-    background: #1e293b !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px !important;
-    color: #f1f5f9 !important;
-    font-size: 15px !important;
-    line-height: 1.6 !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    color: #f8fafc !important;
+    font-size: 16px !important;
+    padding: 16px !important;
+    transition: all 0.2s !important;
 }
 .stTextArea textarea:focus {
     border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.15) !important;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.3) !important;
 }
 
-/* ── Search button ──────────────────────────────────── */
+/* ── Search Button ──────────────────────────────────── */
 .stButton > button[kind="primary"] {
-    background: #2563eb !important;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
     color: white !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     font-weight: 600 !important;
-    font-size: 15px !important;
-    padding: 12px 24px !important;
-    width: 100% !important;
-    transition: background 0.2s !important;
+    font-size: 16px !important;
+    padding: 14px 28px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
 }
 .stButton > button[kind="primary"]:hover {
-    background: #1d4ed8 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5) !important;
+    filter: brightness(1.1) !important;
 }
 
-/* ── Result cards ────────────────────────────────────── */
+/* ── Result Cards ────────────────────────────────────── */
 .result-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 20px 24px;
-    margin-bottom: 16px;
-    transition: border-color 0.2s;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
 }
-.result-card:hover { border-color: #475569; }
+.result-card:hover { 
+    border-color: rgba(96, 165, 250, 0.3); 
+    background: rgba(30, 41, 59, 0.6);
+}
 .result-card .case-title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: #f8fafc;
     margin-bottom: 8px;
 }
 .result-card .case-meta {
     font-size: 13px;
-    color: #64748b;
-    margin-bottom: 12px;
+    color: #94a3b8;
+    margin-bottom: 16px;
 }
 
-/* ── Verdict badges ─────────────────────────────────── */
+/* ── Verdict Badges ─────────────────────────────────── */
 .verdict-badge {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
 }
-.verdict-convicted   { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
-.verdict-acquitted   { background: #14532d; color: #86efac; border: 1px solid #166534; }
-.verdict-bail_granted { background: #713f12; color: #fde68a; border: 1px solid #92400e; }
-.verdict-bail_rejected { background: #7c2d12; color: #fdba74; border: 1px solid #9a3412; }
-.verdict-appeal_allowed { background: #1e3a5f; color: #93c5fd; border: 1px solid #1e40af; }
-.verdict-appeal_dismissed { background: #4a1d96; color: #c4b5fd; border: 1px solid #5b21b6; }
-.verdict-unknown { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+.verdict-convicted   { background: rgba(220, 38, 38, 0.2); color: #fca5a5; border: 1px solid rgba(220, 38, 38, 0.4); }
+.verdict-acquitted   { background: rgba(22, 163, 74, 0.2); color: #86efac; border: 1px solid rgba(22, 163, 74, 0.4); }
+.verdict-bail_granted { background: rgba(202, 138, 4, 0.2); color: #fde047; border: 1px solid rgba(202, 138, 4, 0.4); }
+.verdict-bail_rejected { background: rgba(234, 88, 12, 0.2); color: #fdba74; border: 1px solid rgba(234, 88, 12, 0.4); }
+.verdict-appeal_allowed { background: rgba(37, 99, 235, 0.2); color: #93c5fd; border: 1px solid rgba(37, 99, 235, 0.4); }
+.verdict-appeal_dismissed { background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid rgba(147, 51, 234, 0.4); }
+.verdict-unknown { background: rgba(71, 85, 105, 0.2); color: #cbd5e1; border: 1px solid rgba(71, 85, 105, 0.4); }
 
-/* ── Gap cards ───────────────────────────────────────── */
+/* ── Gap Cards ───────────────────────────────────────── */
 .gap-card {
-    background: #1e293b;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-left: 4px solid #ef4444;
-    border-radius: 0 10px 10px 0;
-    padding: 20px 24px;
-    margin-bottom: 20px;
+    border-radius: 8px 12px 12px 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 .gap-card.moderate { border-left-color: #f97316; }
 .gap-card.low      { border-left-color: #eab308; }
 .gap-card-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
-    color: #f1f5f9;
-    margin-bottom: 8px;
+    color: #f8fafc;
+    margin-bottom: 12px;
 }
 .gap-insight {
-    background: #0f172a;
-    border: 1px solid #1e40af;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #93c5fd;
-    margin-top: 12px;
+    padding: 16px;
+    font-size: 14px;
+    color: #bae6fd;
+    margin-top: 16px;
     line-height: 1.6;
 }
 
-/* ── Section headers ─────────────────────────────────── */
+/* ── Section Headers ─────────────────────────────────── */
 .section-header {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
-    color: #f1f5f9;
-    margin: 0 0 4px 0;
+    color: #f8fafc;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
 }
 .section-sub {
-    font-size: 13px;
-    color: #64748b;
-    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 0 0 24px 0;
 }
 
-/* ── Query understanding pill ───────────────────────── */
+/* ── Query Pills ────────────────────────────────────── */
 .query-pill {
     display: inline-block;
-    background: #1e3a5f;
-    border: 1px solid #1e40af;
+    background: rgba(30, 58, 138, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 13px;
-    color: #93c5fd;
-    margin: 0 4px 8px 0;
-}
-
-/* ── Score badge ─────────────────────────────────────── */
-.score-badge {
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 4px 10px;
+    padding: 6px 16px;
     font-size: 12px;
-    color: #94a3b8;
-    font-family: monospace;
+    font-weight: 500;
+    color: #bfdbfe;
+    margin: 0 6px 10px 0;
+    transition: all 0.2s;
+    cursor: default;
+}
+.query-pill:hover {
+    background: rgba(30, 58, 138, 0.5);
+    border-color: rgba(59, 130, 246, 0.5);
 }
 
-/* ── Hide Streamlit branding ─────────────────────────── */
+/* ── Score Badge ─────────────────────────────────────── */
+.score-badge {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #94a3b8;
+    font-family: 'SF Mono', Consolas, monospace;
+    font-weight: 500;
+}
+
+/* ── Streamlit UI Tweaks ─────────────────────────────── */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 header { visibility: hidden; }
+hr { border-color: rgba(255, 255, 255, 0.05); margin: 32px 0; }
 
-/* ── Dividers ────────────────────────────────────────── */
-hr { border-color: #1e293b; margin: 24px 0; }
-
-/* ── Info/warning/error boxes ────────────────────────── */
 .stAlert {
-    border-radius: 8px !important;
-    border: none !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(4px) !important;
 }
-
-/* ── Expander ────────────────────────────────────────── */
 .streamlit-expanderHeader {
-    background: #1e293b !important;
-    border-radius: 8px !important;
-    font-size: 13px !important;
-    color: #94a3b8 !important;
+    background: rgba(30, 41, 59, 0.5) !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 </style>
 """, unsafe_allow_html=True)
