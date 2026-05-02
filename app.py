@@ -25,7 +25,7 @@ if "feedback" not in st.session_state:
 st.markdown("""
 <style>
 /* ── Premium Typography ─────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Outfit', sans-serif;
@@ -39,24 +39,25 @@ html, body, [class*="css"] {
     max-width: 1200px;
 }
 .stApp {
-    background: radial-gradient(circle at top, #1e293b 0%, #020617 100%);
+    background-color: #000000;
+    background-image: radial-gradient(at 50% 0%, rgba(29, 78, 216, 0.15) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
 }
 
 /* ── Sidebar ────────────────────────────────────────── */
 [data-testid="stSidebar"] {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(12px);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: #09090b !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-/* ── Header Banner (Glassmorphism) ──────────────────── */
+/* ── Header Banner (High Contrast) ──────────────────── */
 .lexai-header {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, rgba(15, 23, 42, 0.4) 100%);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(96, 165, 250, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    background: linear-gradient(180deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     border-radius: 16px;
-    padding: 32px 40px;
+    padding: 36px 40px;
     margin-bottom: 32px;
     position: relative;
     overflow: hidden;
@@ -64,116 +65,115 @@ html, body, [class*="css"] {
 .lexai-header::before {
     content: '';
     position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 50%);
-    z-index: 0; pointer-events: none;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.5), transparent);
 }
-.lexai-header > * { position: relative; z-index: 1; }
 .lexai-header h1 {
-    background: linear-gradient(to right, #60a5fa, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 36px;
-    font-weight: 700;
+    color: #ffffff;
+    font-size: 42px;
+    font-weight: 800;
     margin: 0;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
 }
 .lexai-header p {
-    color: #94a3b8;
-    font-size: 15px;
-    margin: 8px 0 0 0;
+    color: #a1a1aa;
+    font-size: 16px;
+    margin: 12px 0 0 0;
     font-weight: 400;
 }
 
 /* ── Metric Cards ────────────────────────────────────── */
 .metric-card {
-    background: rgba(30, 41, 59, 0.5);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: rgba(24, 24, 27, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
     padding: 24px;
     text-align: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 .metric-card:hover { 
     transform: translateY(-4px);
-    border-color: rgba(96, 165, 250, 0.4); 
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.1);
+    border-color: rgba(56, 189, 248, 0.5); 
+    background: rgba(39, 39, 42, 0.8);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.15);
 }
 .metric-card .value {
-    font-size: 36px;
-    font-weight: 700;
-    color: #f8fafc;
+    font-size: 44px;
+    font-weight: 800;
+    color: #ffffff;
     line-height: 1;
+    letter-spacing: -1px;
 }
 .metric-card .label {
-    font-size: 12px;
-    color: #94a3b8;
-    margin-top: 8px;
+    font-size: 13px;
+    color: #a1a1aa;
+    margin-top: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 500;
+    letter-spacing: 1.5px;
+    font-weight: 600;
 }
 
 /* ── Search Input ───────────────────────────────────── */
 .stTextArea textarea {
-    background: rgba(15, 23, 42, 0.6) !important;
-    backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: #09090b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 12px !important;
-    color: #f8fafc !important;
+    color: #ffffff !important;
     font-size: 16px !important;
-    padding: 16px !important;
-    transition: all 0.2s !important;
+    padding: 18px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5) !important;
 }
 .stTextArea textarea:focus {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.3) !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 1px #38bdf8, inset 0 2px 4px rgba(0,0,0,0.5) !important;
 }
 
 /* ── Search Button ──────────────────────────────────── */
 .stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
-    color: white !important;
+    background: #ffffff !important;
+    color: #000000 !important;
     border: none !important;
     border-radius: 10px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     font-size: 16px !important;
     padding: 14px 28px !important;
     transition: all 0.2s ease !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25) !important;
 }
 .stButton > button[kind="primary"]:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5) !important;
-    filter: brightness(1.1) !important;
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4) !important;
+    background: #f4f4f5 !important;
 }
 
 /* ── Result Cards ────────────────────────────────────── */
 .result-card {
-    background: rgba(30, 41, 59, 0.4);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: rgba(24, 24, 27, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
     padding: 24px;
     margin-bottom: 20px;
     transition: all 0.2s ease;
 }
 .result-card:hover { 
-    border-color: rgba(96, 165, 250, 0.3); 
-    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.2); 
+    background: rgba(39, 39, 42, 0.7);
 }
 .result-card .case-title {
     font-size: 18px;
     font-weight: 600;
-    color: #f8fafc;
+    color: #ffffff;
     margin-bottom: 8px;
 }
 .result-card .case-meta {
-    font-size: 13px;
-    color: #94a3b8;
+    font-size: 14px;
+    color: #a1a1aa;
     margin-bottom: 16px;
 }
 
@@ -188,85 +188,85 @@ html, body, [class*="css"] {
     letter-spacing: 0.5px;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
 }
-.verdict-convicted   { background: rgba(220, 38, 38, 0.2); color: #fca5a5; border: 1px solid rgba(220, 38, 38, 0.4); }
-.verdict-acquitted   { background: rgba(22, 163, 74, 0.2); color: #86efac; border: 1px solid rgba(22, 163, 74, 0.4); }
-.verdict-bail_granted { background: rgba(202, 138, 4, 0.2); color: #fde047; border: 1px solid rgba(202, 138, 4, 0.4); }
-.verdict-bail_rejected { background: rgba(234, 88, 12, 0.2); color: #fdba74; border: 1px solid rgba(234, 88, 12, 0.4); }
-.verdict-appeal_allowed { background: rgba(37, 99, 235, 0.2); color: #93c5fd; border: 1px solid rgba(37, 99, 235, 0.4); }
-.verdict-appeal_dismissed { background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid rgba(147, 51, 234, 0.4); }
-.verdict-unknown { background: rgba(71, 85, 105, 0.2); color: #cbd5e1; border: 1px solid rgba(71, 85, 105, 0.4); }
+.verdict-convicted   { background: rgba(220, 38, 38, 0.15); color: #fca5a5; border: 1px solid rgba(220, 38, 38, 0.3); }
+.verdict-acquitted   { background: rgba(22, 163, 74, 0.15); color: #86efac; border: 1px solid rgba(22, 163, 74, 0.3); }
+.verdict-bail_granted { background: rgba(202, 138, 4, 0.15); color: #fde047; border: 1px solid rgba(202, 138, 4, 0.3); }
+.verdict-bail_rejected { background: rgba(234, 88, 12, 0.15); color: #fdba74; border: 1px solid rgba(234, 88, 12, 0.3); }
+.verdict-appeal_allowed { background: rgba(37, 99, 235, 0.15); color: #93c5fd; border: 1px solid rgba(37, 99, 235, 0.3); }
+.verdict-appeal_dismissed { background: rgba(147, 51, 234, 0.15); color: #d8b4fe; border: 1px solid rgba(147, 51, 234, 0.3); }
+.verdict-unknown { background: rgba(82, 82, 91, 0.2); color: #d4d4d8; border: 1px solid rgba(82, 82, 91, 0.4); }
 
 /* ── Gap Cards ───────────────────────────────────────── */
 .gap-card {
-    background: rgba(30, 41, 59, 0.4);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(24, 24, 27, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-left: 4px solid #ef4444;
-    border-radius: 8px 12px 12px 8px;
+    border-radius: 8px 14px 14px 8px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 .gap-card.moderate { border-left-color: #f97316; }
 .gap-card.low      { border-left-color: #eab308; }
 .gap-card-title {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
-    color: #f8fafc;
+    color: #ffffff;
     margin-bottom: 12px;
 }
 .gap-insight {
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 8px;
+    background: #09090b;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
     padding: 16px;
     font-size: 14px;
-    color: #bae6fd;
+    color: #38bdf8;
     margin-top: 16px;
     line-height: 1.6;
 }
 
 /* ── Section Headers ─────────────────────────────────── */
 .section-header {
-    font-size: 24px;
-    font-weight: 700;
-    color: #f8fafc;
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffffff;
     margin: 0 0 8px 0;
     letter-spacing: -0.5px;
 }
 .section-sub {
-    font-size: 14px;
-    color: #94a3b8;
+    font-size: 15px;
+    color: #a1a1aa;
     margin: 0 0 24px 0;
 }
 
 /* ── Query Pills ────────────────────────────────────── */
 .query-pill {
     display: inline-block;
-    background: rgba(30, 58, 138, 0.3);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 6px 16px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
-    color: #bfdbfe;
+    color: #e4e4e7;
     margin: 0 6px 10px 0;
     transition: all 0.2s;
     cursor: default;
 }
 .query-pill:hover {
-    background: rgba(30, 58, 138, 0.5);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
 }
 
 /* ── Score Badge ─────────────────────────────────────── */
 .score-badge {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 6px 12px;
     font-size: 13px;
-    color: #94a3b8;
+    color: #a1a1aa;
     font-family: 'SF Mono', Consolas, monospace;
     font-weight: 500;
 }
@@ -281,13 +281,14 @@ hr { border-color: rgba(255, 255, 255, 0.05); margin: 32px 0; }
     border-radius: 10px !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(4px) !important;
+    background: rgba(24, 24, 27, 0.8) !important;
 }
 .streamlit-expanderHeader {
-    background: rgba(30, 41, 59, 0.5) !important;
+    background: rgba(24, 24, 27, 0.8) !important;
     border-radius: 10px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    color: #cbd5e1 !important;
+    color: #e4e4e7 !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 </style>
