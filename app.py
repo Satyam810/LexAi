@@ -24,48 +24,227 @@ if "feedback" not in st.session_state:
 # ── Dark theme CSS ────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+/* ── Global typography ─────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-* { font-family: 'Inter', sans-serif; }
-
-.main-header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    padding: 2rem; border-radius: 16px; margin-bottom: 2rem;
-    border: 1px solid rgba(255,255,255,0.1);
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
 }
-.main-header h1 {
-    color: #e94560; font-size: 2.2rem; font-weight: 700; margin: 0;
-}
-.main-header p { color: #a8a8b3; margin: 0.5rem 0 0 0; }
 
+/* ── Remove default Streamlit padding ──────────────── */
+.main .block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 1100px;
+}
+
+/* ── Sidebar ────────────────────────────────────────── */
+[data-testid="stSidebar"] {
+    background: #0f172a;
+    border-right: 1px solid #1e293b;
+}
+[data-testid="stSidebar"] .css-1d391kg {
+    padding-top: 2rem;
+}
+
+/* ── Header banner ──────────────────────────────────── */
+.lexai-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    border: 1px solid #1e40af;
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 24px;
+}
+.lexai-header h1 {
+    color: #60a5fa;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+.lexai-header p {
+    color: #94a3b8;
+    font-size: 14px;
+    margin: 4px 0 0 0;
+}
+
+/* ── Metric cards ────────────────────────────────────── */
 .metric-card {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border: 1px solid rgba(233,69,96,0.3); border-radius: 12px;
-    padding: 1.2rem; text-align: center;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: border-color 0.2s;
 }
-.metric-card h3 { color: #e94560; font-size: 1.8rem; margin: 0; }
-.metric-card p { color: #a8a8b3; font-size: 0.85rem; margin: 0.3rem 0 0 0; }
+.metric-card:hover { border-color: #60a5fa; }
+.metric-card .value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #f1f5f9;
+    line-height: 1;
+}
+.metric-card .label {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
+/* ── Search input ───────────────────────────────────── */
+.stTextArea textarea {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    color: #f1f5f9 !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+}
+.stTextArea textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15) !important;
+}
+
+/* ── Search button ──────────────────────────────────── */
+.stButton > button[kind="primary"] {
+    background: #2563eb !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    padding: 12px 24px !important;
+    width: 100% !important;
+    transition: background 0.2s !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #1d4ed8 !important;
+}
+
+/* ── Result cards ────────────────────────────────────── */
 .result-card {
-    background: rgba(26,26,46,0.8); border: 1px solid rgba(233,69,96,0.2);
-    border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem;
-    transition: border-color 0.3s;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
 }
-.result-card:hover { border-color: rgba(233,69,96,0.6); }
+.result-card:hover { border-color: #475569; }
+.result-card .case-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+}
+.result-card .case-meta {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 12px;
+}
 
+/* ── Verdict badges ─────────────────────────────────── */
+.verdict-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.verdict-convicted   { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
+.verdict-acquitted   { background: #14532d; color: #86efac; border: 1px solid #166534; }
+.verdict-bail_granted { background: #713f12; color: #fde68a; border: 1px solid #92400e; }
+.verdict-bail_rejected { background: #7c2d12; color: #fdba74; border: 1px solid #9a3412; }
+.verdict-appeal_allowed { background: #1e3a5f; color: #93c5fd; border: 1px solid #1e40af; }
+.verdict-appeal_dismissed { background: #4a1d96; color: #c4b5fd; border: 1px solid #5b21b6; }
+.verdict-unknown { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+
+/* ── Gap cards ───────────────────────────────────────── */
 .gap-card {
-    background: linear-gradient(135deg, rgba(233,69,96,0.1), rgba(15,52,96,0.3));
-    border: 1px solid rgba(233,69,96,0.4); border-radius: 12px;
-    padding: 1.2rem; margin-bottom: 1rem;
+    background: #1e293b;
+    border-left: 4px solid #ef4444;
+    border-radius: 0 10px 10px 0;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+.gap-card.moderate { border-left-color: #f97316; }
+.gap-card.low      { border-left-color: #eab308; }
+.gap-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+}
+.gap-insight {
+    background: #0f172a;
+    border: 1px solid #1e40af;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #93c5fd;
+    margin-top: 12px;
+    line-height: 1.6;
 }
 
-.tag {
-    display: inline-block; background: rgba(233,69,96,0.2);
-    color: #e94560; padding: 2px 8px; border-radius: 6px;
-    font-size: 0.75rem; margin: 2px;
+/* ── Section headers ─────────────────────────────────── */
+.section-header {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 4px 0;
 }
-.tag-green {
-    background: rgba(0,200,117,0.2); color: #00c875;
+.section-sub {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 20px 0;
+}
+
+/* ── Query understanding pill ───────────────────────── */
+.query-pill {
+    display: inline-block;
+    background: #1e3a5f;
+    border: 1px solid #1e40af;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #93c5fd;
+    margin: 0 4px 8px 0;
+}
+
+/* ── Score badge ─────────────────────────────────────── */
+.score-badge {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: monospace;
+}
+
+/* ── Hide Streamlit branding ─────────────────────────── */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header { visibility: hidden; }
+
+/* ── Dividers ────────────────────────────────────────── */
+hr { border-color: #1e293b; margin: 24px 0; }
+
+/* ── Info/warning/error boxes ────────────────────────── */
+.stAlert {
+    border-radius: 8px !important;
+    border: none !important;
+}
+
+/* ── Expander ────────────────────────────────────────── */
+.streamlit-expanderHeader {
+    background: #1e293b !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    color: #94a3b8 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -382,28 +561,50 @@ def get_query_logger():
 
 def render_header():
     st.markdown("""
-    <div class="main-header">
-        <h1>LexAI v3.3</h1>
-        <p>Indian Court Judgment Similarity Engine & Legal Gap Finder</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="lexai-header">
+    <h1>⚖️ LexAI v3.3</h1>
+    <p>Indian Court Judgment Similarity Engine & Legal Gap Finder
+    &nbsp;·&nbsp; 500 cases &nbsp;·&nbsp; LegalBERT + FAISS
+    &nbsp;·&nbsp; Open Source</p>
+</div>
+""", unsafe_allow_html=True)
 
 
 def render_metrics(metrics):
-    cols = st.columns(4)
-    items = [
-        (metrics.get("total_cases", 0), "Cases Analyzed"),
-        (metrics.get("n_clusters", 0), "Judgment Clusters"),
-        (f"{metrics.get('silhouette_score', 0):.3f}", "Silhouette Score"),
-        (metrics.get("winner_algorithm", "N/A").upper(), "Clustering Algorithm"),
-    ]
-    for col, (val, label) in zip(cols, items):
-        col.markdown(f"""
+    m1, m2, m3, m4 = st.columns(4)
+
+    with m1:
+        st.markdown(f"""
         <div class="metric-card">
-            <h3>{val}</h3>
-            <p>{label}</p>
-        </div>
-        """, unsafe_allow_html=True)
+            <div class="value">{metrics.get("total_cases", 0):,}</div>
+            <div class="label">Cases Indexed</div>
+        </div>""", unsafe_allow_html=True)
+
+    with m2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="value">{metrics.get("n_clusters", 0)}</div>
+            <div class="label">Clusters</div>
+        </div>""", unsafe_allow_html=True)
+
+    with m3:
+        sil = metrics.get("silhouette_score", 0)
+        sil_color = "#86efac" if sil >= 0.5 else "#fde68a" if sil >= 0.2 else "#fca5a5"
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="value" style="color:{sil_color}">{sil:.3f}</div>
+            <div class="label">Silhouette</div>
+        </div>""", unsafe_allow_html=True)
+
+    with m4:
+        algo = metrics.get("winner_algorithm", "KMeans").upper()
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="value" style="font-size:20px">{algo}</div>
+            <div class="label">Algorithm</div>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
 
 @st.cache_resource
@@ -413,7 +614,23 @@ def get_pipeline():
 
 
 def render_search():
-    st.markdown("### Search Similar Judgments")
+    # Section header
+    st.markdown("""
+    <p class="section-header">Search Similar Judgments</p>
+    <p class="section-sub">Describe your case — LexAI finds the most similar
+    past judgments and explains why they match.</p>
+    """, unsafe_allow_html=True)
+
+    # Query examples as clickable pills (informational)
+    st.markdown("""
+    <div style="margin-bottom:12px">
+    <span style="font-size:12px;color:#64748b">Try: </span>
+    <span class="query-pill">IPC 302 murder with eyewitness</span>
+    <span class="query-pill">Bail application IPC 420 fraud</span>
+    <span class="query-pill">Appeal against acquittal</span>
+    </div>
+    """, unsafe_allow_html=True)
+
     query = st.text_area(
         "Enter legal query or case description:",
         placeholder="e.g., bail application under IPC 302 murder where accused has no prior record",
@@ -421,9 +638,9 @@ def render_search():
         key="search_query"
     )
 
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        use_reranker = st.checkbox("Use cross-encoder reranker", value=True)
+    # FAISS direct retrieval — reranker disabled (evaluated, no improvement)
+    use_reranker = False
+    st.caption("🔍 Using FAISS direct retrieval · MRR@5: 0.5269 · ~270ms")
 
     if st.button("Search", type="primary", use_container_width=True):
         pipeline = get_pipeline()
@@ -477,119 +694,114 @@ def render_search():
             )
             st.divider()
 
-        # Verdict color maps
-        VERDICT_COLORS = {
-            "convicted":         "#ef4444",
-            "acquitted":         "#22c55e",
-            "bail_granted":      "#eab308",
-            "bail_rejected":     "#f97316",
-            "appeal_allowed":    "#3b82f6",
-            "appeal_dismissed":  "#8b5cf6",
-            "sentence_modified": "#6366f1",
-            "unknown":           "#6b7280",
+        VERDICT_CSS = {
+            "convicted":          "verdict-convicted",
+            "acquitted":          "verdict-acquitted",
+            "bail_granted":       "verdict-bail_granted",
+            "bail_rejected":      "verdict-bail_rejected",
+            "appeal_allowed":     "verdict-appeal_allowed",
+            "appeal_dismissed":   "verdict-appeal_dismissed",
+            "sentence_modified":  "verdict-appeal_allowed",
+            "unknown":            "verdict-unknown",
         }
+
         VERDICT_LABELS = {
-            "convicted":         "CONVICTED",
-            "acquitted":         "ACQUITTED",
-            "bail_granted":      "BAIL GRANTED",
-            "bail_rejected":     "BAIL REJECTED",
-            "appeal_allowed":    "APPEAL ALLOWED",
-            "appeal_dismissed":  "APPEAL DISMISSED",
-            "sentence_modified": "SENTENCE MODIFIED",
-            "unknown":           "VERDICT UNKNOWN",
+            "convicted":          "Convicted",
+            "acquitted":          "Acquitted",
+            "bail_granted":       "Bail Granted",
+            "bail_rejected":      "Bail Rejected",
+            "appeal_allowed":     "Appeal Allowed",
+            "appeal_dismissed":   "Appeal Dismissed",
+            "sentence_modified":  "Sentence Modified",
+            "unknown":            "Unknown",
         }
 
         for result in response.results:
             case    = result.case
             exp     = result.explanation
             verdict = case.get("verdict", "unknown")
-            color   = VERDICT_COLORS.get(verdict, "#6b7280")
-            label   = VERDICT_LABELS.get(verdict, "UNKNOWN")
+            css_cls = VERDICT_CSS.get(verdict, "verdict-unknown")
+            v_label = VERDICT_LABELS.get(verdict, "Unknown")
+            court   = case.get("court", "Unknown Court")
+            date    = case.get("date", "")
+            score   = result.score
 
-            with st.container():
-                # Title row
-                title_col, score_col = st.columns([4, 1])
-                with title_col:
-                    court = case.get("court", "Unknown Court")
-                    date  = case.get("date", "")
-                    st.markdown(f"**#{result.rank} \u2014 {court}**")
-                    if date:
-                        st.caption(f"Date: {date}")
-                with score_col:
-                    st.metric(
-                        "Similarity",
-                        f"{result.score:.3f}",
-                        help="Higher = more similar to your query"
-                    )
+            # Card header
+            st.markdown(f"""
+            <div class="result-card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                    <div>
+                        <span class="verdict-badge {css_cls}">{v_label}</span>
+                        <div class="case-title" style="margin-top:10px">#{result.rank} — {court}</div>
+                        <div class="case-meta">{date}</div>
+                    </div>
+                    <span class="score-badge">Score: {score:.3f}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-                # Verdict badge + key evidence
-                badge_col, info_col = st.columns([1, 3])
-                with badge_col:
-                    st.markdown(
-                        f"<div style='background:{color};color:white;"
-                        f"padding:6px 12px;border-radius:6px;"
-                        f"text-align:center;font-weight:bold;"
-                        f"font-size:13px'>{label}</div>",
-                        unsafe_allow_html=True
-                    )
-                with info_col:
-                    if exp.get("shared_ipc"):
-                        st.write(f"**Shared IPC:** {', '.join(exp['shared_ipc'])}")
-                    if exp.get("shared_evidence"):
-                        st.write(f"**Matching evidence:** {', '.join(exp['shared_evidence'])}")
-                    if exp.get("shared_case_type"):
-                        st.write(f"**Same case type:** {case.get('case_type','').title()}")
+            # Matching factors
+            factors = []
+            if exp.get("shared_ipc"):
+                factors.append(f"**IPC:** {', '.join(exp['shared_ipc'])}")
+            if exp.get("shared_evidence"):
+                factors.append(f"**Evidence:** {', '.join(exp['shared_evidence'])}")
+            if exp.get("shared_case_type"):
+                factors.append(f"**Type:** {case.get('case_type','').title()}")
 
-                # Why this result — expandable
-                with st.expander("\u2696\uFE0F Why this result?"):
-                    st.info(exp["similarity_reason"])
-                    st.warning(exp["key_differences"])
-                    verdict_text = exp["verdict_analysis"]
-                    if "divergence" in verdict_text.lower():
-                        st.error(verdict_text)
-                    elif "alignment" in verdict_text.lower():
-                        st.success(verdict_text)
+            if factors:
+                st.markdown(" &nbsp;·&nbsp; ".join(factors))
+
+            # Expandable explanation
+            with st.expander("⚖️ Why this result?", expanded=False):
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    st.markdown("**Similarity**")
+                    st.info(exp.get("similarity_reason", "—"))
+                    st.markdown("**Differences**")
+                    st.warning(exp.get("key_differences", "—"))
+                with col_b:
+                    st.markdown("**Verdict Analysis**")
+                    va = exp.get("verdict_analysis", "—")
+                    if "divergence" in va.lower():
+                        st.error(va)
+                    elif "alignment" in va.lower():
+                        st.success(va)
                     else:
-                        st.write(verdict_text)
+                        st.info(va)
 
-                # Feedback buttons
-                query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
-                case_id    = case.get("id", str(result.rank))
-                fb_key     = f"{query_hash}|{case_id}"
-
-                current_fb = st.session_state["feedback"].get(fb_key, None)
-
-                fb_col1, fb_col2, fb_col3 = st.columns([1, 1, 6])
-                with fb_col1:
-                    if st.button(
-                        "\U0001F44D Relevant",
-                        key=f"up_{fb_key}",
-                        type="primary" if current_fb == "relevant" else "secondary"
-                    ):
-                        st.session_state["feedback"][fb_key] = "relevant"
-                        save_feedback_to_disk(st.session_state["feedback"])
-                        st.rerun()
-                with fb_col2:
-                    if st.button(
-                        "\U0001F44E Not relevant",
-                        key=f"down_{fb_key}",
-                        type="primary" if current_fb == "not_relevant" else "secondary"
-                    ):
-                        st.session_state["feedback"][fb_key] = "not_relevant"
-                        save_feedback_to_disk(st.session_state["feedback"])
-                        st.rerun()
-                with fb_col3:
-                    if current_fb:
-                        st.caption(
-                            f"\u2713 Marked as {'relevant' if current_fb == 'relevant' else 'not relevant'}"
-                        )
-
-                # Judgment excerpt
-                excerpt = case.get("text", "")[:400]
+                # Case excerpt
+                excerpt = case.get("text", "")[:350]
                 if excerpt:
+                    st.markdown("**Excerpt**")
                     st.caption(f'"{excerpt}..."')
 
-                st.divider()
+            # Feedback buttons
+            fb_key = f"{hashlib.md5(query.encode()).hexdigest()[:6]}|{case.get('id','')}"
+            current_fb = st.session_state.get("feedback", {}).get(fb_key)
+
+            fc1, fc2, fc3 = st.columns([1, 1, 6])
+            with fc1:
+                if st.button("👍", key=f"up_{fb_key}", help="Mark as relevant"):
+                    if "feedback" not in st.session_state:
+                        st.session_state["feedback"] = {}
+                    st.session_state["feedback"][fb_key] = "relevant"
+                    save_feedback_to_disk(st.session_state["feedback"])
+                    st.rerun()
+            with fc2:
+                if st.button("👎", key=f"dn_{fb_key}", help="Mark as not relevant"):
+                    if "feedback" not in st.session_state:
+                        st.session_state["feedback"] = {}
+                    st.session_state["feedback"][fb_key] = "not_relevant"
+                    save_feedback_to_disk(st.session_state["feedback"])
+                    st.rerun()
+            with fc3:
+                if current_fb == "relevant":
+                    st.caption("✓ Marked relevant")
+                elif current_fb == "not_relevant":
+                    st.caption("✗ Marked not relevant")
+
+            st.markdown("---")
 
 
 def render_cluster_map():
@@ -761,63 +973,70 @@ def render_gaps():
         all_explanations = {}
 
     for gap in gaps:
-        score = gap["inconsistency_score"]
+        score    = gap["inconsistency_score"]
+        card_cls = "gap-card" + (" moderate" if score < 0.45 else "") + \
+                   (" low" if score < 0.30 else "")
+        conv_cnt = gap.get("convicted_count", 0)
+        acqu_cnt = gap.get("acquitted_count", 0)
+        dom_type = gap.get("dominant_case_type", "general").title()
+        ipc_list = ", ".join(gap.get("common_ipc_sections", [])[:4]) or "—"
 
-        with st.container():
-            # Header row
-            col_head, col_badges = st.columns([3, 1])
-            with col_head:
-                st.markdown(
-                    f"**Cluster {gap['cluster_id']}** \u2014 "
-                    f"{gap['total_cases']} cases \u2014 "
-                    f"Inconsistency: **{score:.0%}**"
-                )
-            with col_badges:
-                badge_col1, badge_col2 = st.columns(2)
-                badge_col1.markdown(
-                    f"<span style='background:#16a34a;color:white;"
-                    f"padding:2px 8px;border-radius:4px;font-size:12px'>"
-                    f"Granted: {gap.get('bail_granted_count', 0) + gap.get('acquitted_count', 0)}</span>",
-                    unsafe_allow_html=True
-                )
-                badge_col2.markdown(
-                    f"<span style='background:#dc2626;color:white;"
-                    f"padding:2px 8px;border-radius:4px;font-size:12px'>"
-                    f"Rejected: {gap.get('bail_rejected_count', 0) + gap.get('convicted_count', 0)}</span>",
-                    unsafe_allow_html=True
-                )
+        # Use actual verdict labels from gap data
+        convicted_count = gap.get("convicted_count", 0)
+        acquitted_count = gap.get("acquitted_count", 0)
+        bail_granted    = gap.get("bail_granted_count", 0)
+        bail_rejected   = gap.get("bail_rejected_count", 0)
 
-            # Look up pre-computed explanation
-            explanation = all_explanations.get(
-                gap["cluster_id"],
-                {
-                    "summary": f"Cluster {gap['cluster_id']} shows {score:.0%} inconsistency.",
-                    "key_differences": [
-                        f"IPC sections: {', '.join(gap.get('common_ipc_sections', ['unknown']))}"
-                    ],
-                    "legal_insight": "Load cluster labels to see full analysis."
-                }
+        # Show whichever pair has data
+        if convicted_count + acquitted_count > 0:
+            label_a = f"Convicted: {convicted_count}"
+            label_b = f"Acquitted: {acquitted_count}"
+        else:
+            label_a = f"Granted: {bail_granted}"
+            label_b = f"Rejected: {bail_rejected}"
+
+        # Get pre-computed explanation
+        explanation = all_explanations.get(gap["cluster_id"], {})
+        summary     = explanation.get("summary", "")
+        diffs       = explanation.get("key_differences", [])
+        insight     = explanation.get("legal_insight", "")
+
+        st.markdown(f"""
+        <div class="{card_cls}">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="gap-card-title">
+                    Cluster {gap['cluster_id']}
+                    &nbsp;·&nbsp;
+                    {gap['total_cases']} cases
+                    &nbsp;·&nbsp;
+                    <span style="color:#f87171">{score:.0%} inconsistency</span>
+                </div>
+                <div>
+                    <span class="verdict-badge verdict-convicted"
+                          style="margin-right:6px">{label_a}</span>
+                    <span class="verdict-badge verdict-acquitted">
+                          {label_b}</span>
+                </div>
+            </div>
+            <div style="color:#94a3b8;font-size:13px;margin-top:8px">
+                {dom_type} · IPC {ipc_list}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if summary:
+            st.write(summary)
+
+        for diff in diffs:
+            st.markdown(f"• {diff}")
+
+        if insight:
+            st.markdown(
+                f'<div class="gap-insight">⚖️ <strong>Legal Insight:</strong> {insight}</div>',
+                unsafe_allow_html=True
             )
 
-            # Summary
-            st.write(explanation["summary"])
-
-            # Key differences as bullet points
-            if explanation["key_differences"]:
-                for diff in explanation["key_differences"]:
-                    st.markdown(f"\u2022 {diff}")
-
-            # Legal insight in a styled box
-            st.info(f"\u2696\uFE0F **Legal Insight:** {explanation['legal_insight']}")
-
-            # IPC sections
-            if gap.get("common_ipc_sections"):
-                st.caption(
-                    f"Common IPC sections: "
-                    f"{', '.join(gap['common_ipc_sections'][:5])}"
-                )
-
-            st.divider()
+        st.markdown("<br>", unsafe_allow_html=True)
 
 
 def render_eval_metrics():
