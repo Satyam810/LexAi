@@ -377,7 +377,7 @@ See [LICENSE](LICENSE) for details.
 **Satyam Kumar** — AI/ML Engineer
 
 [![GitHub](https://img.shields.io/badge/GitHub-Satyam810-181717?style=for-the-badge&logo=github)](https://github.com/Satyam810)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-satyamkumar-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/satyamkumar)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-satyamlpu-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/satyamlpu/)
 
 </div>
 
