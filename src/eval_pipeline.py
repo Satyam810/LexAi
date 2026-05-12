@@ -72,7 +72,7 @@ def run_retrieval_eval():
 
     # Load assets
     print("\nLoading cases and index...")
-    with open(CASES_JSON_PATH) as f:
+    with open(CASES_JSON_PATH, encoding="utf-8") as f:
         cases = json.load(f)
 
     embeddings = np.load(EMBEDDINGS_PATH).astype("float32")
@@ -229,7 +229,7 @@ def run_retrieval_eval():
 
     # Save
     Path(RETRIEVAL_METRICS_PATH).parent.mkdir(parents=True, exist_ok=True)
-    with open(RETRIEVAL_METRICS_PATH, "w") as f:
+    with open(RETRIEVAL_METRICS_PATH, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
     # Print report

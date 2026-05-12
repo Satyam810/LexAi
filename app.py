@@ -425,7 +425,7 @@ def render_search():
     use_reranker = False
     st.caption("🔍 Using FAISS direct retrieval · MRR@5: 0.5269 · ~270ms")
 
-    if st.button("Search", type="primary", use_container_width=True):
+    if st.button("Search", type="primary", width="stretch"):
         pipeline = get_pipeline()
         ok, msg = pipeline.health_check()
         if not ok:
@@ -715,7 +715,7 @@ def render_cluster_map():
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter"),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     # Cluster summary table
     st.markdown("**Cluster Summary**")
@@ -738,7 +738,7 @@ def render_cluster_map():
     if summary_rows:
         st.dataframe(
             pd.DataFrame(summary_rows),
-            use_container_width=True,
+            width="stretch",
             hide_index=True
         )
 
@@ -775,7 +775,7 @@ def render_verdict_distribution():
         font=dict(family="Inter"),
         showlegend=False, height=350,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     st.caption(
         "Dataset note: Bail applications dominate because Indian Kanoon "
         "returns a high volume of bail matter judgments. "

@@ -1,11 +1,11 @@
 {
-  "winner_algorithm": "kmeans",
-  "n_clusters": 5,
-  "silhouette_score": 0.0495,
-  "davies_bouldin_score": 3.3645,
+  "winner_algorithm": "hdbscan",
+  "n_clusters": 3,
+  "silhouette_score": 0.8344,
+  "davies_bouldin_score": 0.7362,
   "kmeans_best_k": 5,
-  "kmeans_best_silhouette": 0.0495,
-  "hdbscan_n_clusters": 0,
-  "hdbscan_silhouette": 0.0,
-  "total_cases": 500
+  "kmeans_best_silhouette": 0.6138,
+  "hdbscan_n_clusters": 3,
+  "hdbscan_silhouette": 0.8344,
+  "total_cases": 5007
 }

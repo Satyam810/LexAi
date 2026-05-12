@@ -134,7 +134,7 @@ class SearchPipeline:
 
         log.info("Loading search assets (first call)...")
 
-        with open(CASES_JSON_PATH) as f:
+        with open(CASES_JSON_PATH, encoding="utf-8") as f:
             self._cases = json.load(f)
 
         self._index = faiss.read_index(FAISS_INDEX_PATH)

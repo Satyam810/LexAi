@@ -11,7 +11,7 @@ def detect_gaps(cases=None, labels=None):
     Returns list of gap dicts sorted by inconsistency_score (desc).
     """
     if cases is None:
-        with open(CASES_JSON_PATH) as f:
+        with open(CASES_JSON_PATH, encoding="utf-8") as f:
             cases = json.load(f)
     if labels is None:
         labels = np.load(LABELS_PATH)
@@ -67,7 +67,7 @@ def detect_gaps(cases=None, labels=None):
 
 if __name__ == "__main__":
     gaps = detect_gaps()
-    with open(GAPS_PATH, "w") as f:
+    with open(GAPS_PATH, "w", encoding="utf-8") as f:
         json.dump(gaps, f, indent=2)
     print(f"Detected {len(gaps)} inconsistent clusters.")
     for g in gaps:

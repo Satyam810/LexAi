@@ -1,39 +1,115 @@
-# Data
+# ============================================================
+#  LexAI — .gitignore
+#  Last updated: 2026-05
+# ============================================================
+
+# ── Large Data Files (too big for GitHub) ───────────────────
 data/raw/
-data/processed/embeddings.npy
-data/processed/faiss.index
-data/judgments.db
+data/archive/
+data/cache/
+data/judgments.db          # ~143 MB SQLite — host on HuggingFace
 data/feedback.json
 data/feedback.lock
 
-# Logs
-logs/
+# ── ML Model Artefacts (generated, not source) ──────────────
+data/processed/embeddings.npy      # ~14.6 MB — regenerate from pipeline
+data/processed/faiss.index         # ~14.6 MB — regenerate from pipeline
+data/processed/cluster_labels.npy  # ~39 KB
+data/processed/coords_2d.npy       # ~39 KB
 
-# Python
+# ✅ KEEP in git (small, safe, needed at runtime):
+# data/processed/cases.json        <- too big (~137MB), excluded below
+# data/processed/cluster_topics.json
+# data/processed/gaps.json
+# data/processed/eval_metrics.json
+# data/processed/eval_metrics_retrieval.json
+
+data/processed/cases.json          # ~137 MB — host on HuggingFace
+
+# ── Model Weight Files ──────────────────────────────────────
+*.npy
+*.index
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.onnx
+
+# ── Logs ────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── Python ──────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 *.egg-info/
 dist/
 build/
+*.egg
+.eggs/
+*.whl
 
-# Environment
-.env
+# ── Virtual Environments ────────────────────────────────────
 venv/
+venv311/
 .venv/
+env/
+.env/
+ENV/
 
-# IDE
+# ── Environment Variables (SECRETS) ─────────────────────────
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+# NOTE: !.env.example must come after all .env rules to override
+!.env.example
+
+# ── Jupyter Notebooks ───────────────────────────────────────
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# ── Streamlit ───────────────────────────────────────────────
+# NOTE: .streamlit/config.toml IS committed (theme/settings)
+# Only secrets are excluded
+.streamlit/secrets.toml
+
+# ── Testing ─────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+*.pytest_cache
+
+# ── IDE / Editor ────────────────────────────────────────────
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
 
-# OS
+# ── OS Files ────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
+ehthumbs.db
 
-# Streamlit
-.streamlit/
+# ── Archive / Backup ────────────────────────────────────────
+archive/
+*.zip
+*.tar.gz
+*.bak
 
-# Scratch/debug files
+# ── Debug / Scratch Scripts ─────────────────────────────────
 check_db.py
 check_imports.py
 schema_check.py
+verify_outputs.py
+scripts/debug/
+scripts/diagnostics/
+scripts/verification/

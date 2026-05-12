@@ -11,7 +11,7 @@ def _load():
     if _index is None:
         _index = faiss.read_index(FAISS_INDEX_PATH)
     if _cases is None:
-        with open(CASES_JSON_PATH) as f:
+        with open(CASES_JSON_PATH, encoding="utf-8") as f:
             _cases = json.load(f)
 
 
