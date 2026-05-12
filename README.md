@@ -17,8 +17,8 @@
 
 <br/>
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Streamlit_Cloud-FF4B4B?style=for-the-badge)](https://share.streamlit.io)
-[![HuggingFace](https://img.shields.io/badge/🤗_Dataset-HuggingFace-FFD21E?style=for-the-badge)](https://huggingface.co/datasets)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-HuggingFace_Spaces-FF4B4B?style=for-the-badge)](https://huggingface.co/spaces/Satyam810/lexai)
+[![HuggingFace](https://img.shields.io/badge/🤗_Dataset-HuggingFace-FFD21E?style=for-the-badge)](https://huggingface.co/datasets/Satyam810/lexai-data)
 [![GitHub Stars](https://img.shields.io/github/stars/Satyam810/lexai?style=for-the-badge&logo=github&color=gold)](https://github.com/Satyam810/lexai/stargazers)
 
 </div>
@@ -227,14 +227,18 @@ Navigate to `http://localhost:8501` 🎉
    INDIAN_KANOON_API_KEY = "your_key_here"
    ```
 
-### Option 2: Hugging Face Spaces
+### Option 2: Hugging Face Spaces (Current Deployment)
 
-1. Create a new **Streamlit Space** at [huggingface.co/spaces](https://huggingface.co/spaces)
-2. Clone the Space repo and push your code
-3. Add `INDIAN_KANOON_API_KEY` as a **Space Secret**
-4. Upload `judgments.db` + processed files as a linked **HF Dataset**
+LexAI is currently deployed on Hugging Face Spaces.
+**[View Live App](https://huggingface.co/spaces/Satyam810/lexai)**
 
-> **Free tier:** 2 vCPU + **16 GB RAM** — handles PyTorch + FAISS comfortably.
+Our architecture for free-tier deployment:
+1. **Source Code**: Hosted in the HF Space repo.
+2. **ML Artifacts**: Large files (`cases.json`, `faiss.index`, cluster data) are decoupled and hosted in a linked dataset (`Satyam810/lexai-data`).
+3. **Cold Start Strategy**: A custom `download_data.py` script fetches the ML artifacts automatically on container boot.
+4. **Secrets**: `INDIAN_KANOON_API_KEY` is securely injected via Space Secrets.
+
+> **Free tier:** 2 vCPU + **16 GB RAM** — handles FAISS + Streamlit comfortably.
 
 ---
 
