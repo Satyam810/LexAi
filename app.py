@@ -1,4 +1,4 @@
-"""LexAI v3.3 — Streamlit Dashboard.
+"""LexAI v3.4 — Streamlit Dashboard.
 
 STRICTLY display-only. All ML logic lives in src/search_pipeline.py.
 """
@@ -16,6 +16,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ── HuggingFace data bootstrap (runs once on cold start) ─────────────────────
+# Downloads cases.json, faiss.index, embeddings.npy from HF Hub if missing.
+# Safe to call every startup — skips download if files already exist.
+try:
+    from download_data import download_if_missing
+    _data_ready = download_if_missing(verbose=True)
+    if not _data_ready:
+        st.error(
+            "⚠️ Some data files could not be downloaded from HuggingFace. "
+            "Search will not work until all files are available. "
+            "Check the app logs for details."
+        )
+except Exception as _dl_err:
+    st.warning(f"Data download check skipped: {_dl_err}")
+
 # Initialize feedback store in session_state
 if "feedback" not in st.session_state:
     st.session_state["feedback"] = {}
@@ -24,6 +39,7 @@ if "feedback" not in st.session_state:
 # ── Dark theme CSS ────────────────────────────────────────────────────────
 with open("assets/styles.css", encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 
 @st.cache_data
